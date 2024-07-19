@@ -19,6 +19,133 @@ class RationalTest {
     }
 
     @Test
+    public void mathsTest() {
+        Rational expected, actual;
+        // test normal numbers
+        expected = Rational.valueOf(1, 2);
+        actual = Rational.valueOf(1, 6).add(Rational.valueOf(1, 3));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(1, 2);
+        actual = Rational.valueOf(2, 5).add(Rational.valueOf(1, 10));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(19, 56);
+        actual = Rational.valueOf(5, 8).subtract(Rational.valueOf(2, 7));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(-1, 6);
+        actual = Rational.valueOf(1, 2).subtract(Rational.valueOf(2, 3));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(10, 21);
+        actual = Rational.valueOf(2, 3).multiply(Rational.valueOf(5, 7));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(-2, 3);
+        actual = Rational.valueOf(-1, 2).multiply(Rational.valueOf(4, 3));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(3, 2);
+        actual = Rational.valueOf(1, 4).divide(Rational.valueOf(1, 6));
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.valueOf(-35, 6);
+        actual = Rational.valueOf(5, 3).divide(Rational.valueOf(-2, 7));
+        Assertions.assertEquals(expected, actual);
+        // test special value addition
+        actual = Rational.POSITIVE_INFINITY.add(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.POSITIVE_INFINITY.add(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.POSITIVE_INFINITY.add(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.POSITIVE_INFINITY.add(Rational.ONE);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.POSITIVE_INFINITY.add(Rational.ONE.negate());
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.add(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NEGATIVE_INFINITY.add(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.add(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NEGATIVE_INFINITY.add(Rational.ONE);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.add(Rational.ONE.negate());
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.NAN.add(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.add(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.add(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.add(Rational.ONE);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.add(Rational.ONE.negate());
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.ONE.add(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.ONE.add(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.ONE.add(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.ONE.negate().add(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.ONE.negate().add(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.ONE.negate().add(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        // test special value multiplication
+        actual = Rational.POSITIVE_INFINITY.multiply(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.POSITIVE_INFINITY.multiply(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.POSITIVE_INFINITY.multiply(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.POSITIVE_INFINITY.multiply(Rational.ONE);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.POSITIVE_INFINITY.multiply(Rational.ONE.negate());
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.multiply(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.multiply(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.multiply(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NEGATIVE_INFINITY.multiply(Rational.ONE);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.NEGATIVE_INFINITY.multiply(Rational.ONE.negate());
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.NAN.multiply(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.multiply(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.multiply(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.multiply(Rational.ONE);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.NAN.multiply(Rational.ONE.negate());
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.ONE.multiply(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.ONE.multiply(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.ONE.multiply(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+        actual = Rational.ONE.negate().multiply(Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, actual);
+        actual = Rational.ONE.negate().multiply(Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, actual);
+        actual = Rational.ONE.negate().multiply(Rational.NAN);
+        Assertions.assertEquals(Rational.NAN, actual);
+    }
+
+    @Test
+    public void inverseTest() {
+        Assertions.assertEquals(Rational.ONE, Rational.ONE.inverse());
+        Assertions.assertEquals(Rational.TWO, Rational.TWO.inverse().inverse());
+        Assertions.assertEquals(Rational.ZERO, Rational.POSITIVE_INFINITY.inverse());
+        Assertions.assertEquals(Rational.ZERO, Rational.NEGATIVE_INFINITY.inverse());
+        Assertions.assertEquals(
+                Rational.POSITIVE_INFINITY, Rational.NEGATIVE_INFINITY.inverse().inverse());
+        Assertions.assertEquals(Rational.NAN, Rational.NAN.inverse());
+    }
+
+    @Test
     public void comparisonsTest() {
         // zero
         Assertions.assertTrue(Rational.ZERO.isFinite());

@@ -20,6 +20,41 @@ public class Rational implements Comparable<Rational> {
         this.denominator = denominator;
     }
 
+    public Rational add(Rational other) {
+        if (this.isFinite() && other.isFinite()) {
+            BigInteger thisNum = numerator.multiply(other.denominator);
+            BigInteger otherNum = other.numerator.multiply(denominator);
+            BigInteger newNum = thisNum.add(otherNum);
+            BigInteger newDen = denominator.multiply(other.denominator);
+            return new Rational(newNum, newDen).normaliseFraction();
+        }
+        if (this.isNan() || other.isNan()) {
+            return NAN;
+        }
+        if (this.isInfinite() && other.isInfinite()) {
+            return this.signum() == other.signum() ? this : NAN;
+        }
+        return this.isInfinite() ? this : other;
+    }
+
+    public Rational subtract(Rational other) {
+        return this.add(other.negate());
+    }
+
+    public Rational multiply(Rational other) {
+        BigInteger newNum = numerator.multiply(other.numerator);
+        BigInteger newDen = denominator.multiply(other.denominator);
+        return new Rational(newNum, newDen).normaliseFraction();
+    }
+
+    public Rational divide(Rational other) {
+        return this.multiply(new Rational(other.denominator, other.numerator));
+    }
+
+    public Rational inverse() {
+        return new Rational(denominator, numerator).normaliseFraction();
+    }
+
     public boolean isFinite() {
         return !denominator.equals(BigInteger.ZERO);
     }
