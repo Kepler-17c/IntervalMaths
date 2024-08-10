@@ -2,6 +2,8 @@ package space.kepler_17c.interval;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -179,6 +181,32 @@ class RationalTest {
         Assertions.assertEquals(-1, Rational.ONE.negate().signum());
         Assertions.assertEquals(Rational.ONE, Rational.ONE.abs());
         Assertions.assertEquals(Rational.ONE, Rational.ONE.negate().abs());
+    }
+
+    @Test
+    public void cutAccuracyTest() {
+        Random rnd = new Random("cutAccuracyTest-rnd-seed".hashCode());
+        int testCount = 128;
+        Supplier<BigInteger> bigIntegerSupplier = () -> {
+            BigInteger lower = BigInteger.valueOf(rnd.nextLong());
+            BigInteger upper = BigInteger.valueOf(rnd.nextLong());
+            return upper.shiftLeft(Long.SIZE).xor(lower);
+        };
+        for (int i = 0; i < testCount; i++) {
+            Rational value = Rational.of(bigIntegerSupplier.get(), bigIntegerSupplier.get());
+            Rational roundedDown = value.cutAccuracy(Long.SIZE * 3 / 2, false);
+            Rational roundedUp = value.cutAccuracy(Long.SIZE * 3 / 2, true);
+            Assertions.assertTrue(
+                    value.isGreaterOrEqualTo(roundedDown),
+                    "Iteration " + i + ", comparing " + value + " with rounded " + roundedDown + "\nBinary: "
+                            + value.numerator.toString(2) + "/" + value.denominator.toString(2) + " -> "
+                            + roundedDown.numerator.toString(2) + "/" + roundedDown.denominator.toString(2));
+            Assertions.assertTrue(
+                    roundedUp.isGreaterOrEqualTo(value),
+                    "Iteration " + i + ", comparing " + value + " with rounded " + roundedUp + "\nBinary: "
+                            + value.numerator.toString(2) + "/" + value.denominator.toString(2) + " -> "
+                            + roundedUp.numerator.toString(2) + "/" + roundedUp.denominator.toString(2));
+        }
     }
 
     @Test

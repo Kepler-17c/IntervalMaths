@@ -88,6 +88,29 @@ public class Rational implements Comparable<Rational> {
         return signum() < 0 ? negate() : this;
     }
 
+    public Rational cutAccuracy(int bitCount, boolean roundingUp) {
+        int maxBitLength = Math.max(numerator.bitLength(), denominator.bitLength());
+        if (maxBitLength <= bitCount) {
+            return this;
+        }
+        int shift = maxBitLength - bitCount;
+        BigInteger shiftedNum =
+                numerator.signum() < 0 ? numerator.negate().shiftRight(shift).negate() : numerator.shiftRight(shift);
+        BigInteger shiftedDen = denominator.shiftRight(shift);
+        Rational shifted = Rational.of(shiftedNum, shiftedDen);
+        int diffSignum = shifted.compareTo(this);
+        // no need to check for diffSignum == 0 because that's impossible in minimal fractions
+        if (diffSignum > 0 == roundingUp) {
+            return shifted;
+        }
+        if (signum() >= 0 == diffSignum > 0) {
+            return Rational.of(shiftedNum, shiftedDen.add(BigInteger.ONE));
+        }
+        return signum() >= 0
+                ? Rational.of(shiftedNum.add(BigInteger.ONE), shiftedDen)
+                : Rational.of(shiftedNum.subtract(BigInteger.ONE), shiftedDen);
+    }
+
     public boolean isGreaterThan(Rational other) {
         return this.compareTo(other) > 0;
     }
