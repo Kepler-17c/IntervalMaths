@@ -28,7 +28,7 @@ public class Rational implements Comparable<Rational> {
             BigInteger newDen = denominator.multiply(other.denominator);
             return new Rational(newNum, newDen).normaliseFraction();
         }
-        if (this.isNan() || other.isNan()) {
+        if (this.isNaN() || other.isNaN()) {
             return NaN;
         }
         if (this.isInfinite() && other.isInfinite()) {
@@ -63,7 +63,7 @@ public class Rational implements Comparable<Rational> {
         return !numerator.equals(BigInteger.ZERO) && denominator.equals(BigInteger.ZERO);
     }
 
-    public boolean isNan() {
+    public boolean isNaN() {
         return numerator.equals(BigInteger.ZERO) && denominator.equals(BigInteger.ZERO);
     }
 
@@ -84,13 +84,13 @@ public class Rational implements Comparable<Rational> {
         }
         // only combinations with NaN or infinity remain
         // first, deal with NaN
-        if (isNan() && other.isNan()) {
+        if (isNaN() && other.isNaN()) {
             return 0;
         }
-        if (isNan()) {
+        if (isNaN()) {
             return -1;
         }
-        if (other.isNan()) {
+        if (other.isNaN()) {
             return 1;
         }
         // only combinations of finite and infinity remain
@@ -126,7 +126,7 @@ public class Rational implements Comparable<Rational> {
     }
 
     private Rational normaliseFraction() {
-        if (isNan()) {
+        if (isNaN()) {
             return this;
         } else if (numerator.equals(BigInteger.ZERO)) {
             return ZERO;

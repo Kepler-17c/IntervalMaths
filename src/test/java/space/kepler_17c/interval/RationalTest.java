@@ -149,23 +149,23 @@ class RationalTest {
         // zero
         Assertions.assertTrue(Rational.ZERO.isFinite());
         Assertions.assertFalse(Rational.ZERO.isInfinite());
-        Assertions.assertFalse(Rational.ZERO.isNan());
+        Assertions.assertFalse(Rational.ZERO.isNaN());
         // one
         Assertions.assertTrue(Rational.ONE.isFinite());
         Assertions.assertFalse(Rational.ONE.isInfinite());
-        Assertions.assertFalse(Rational.ONE.isNan());
+        Assertions.assertFalse(Rational.ONE.isNaN());
         // +Inf
         Assertions.assertFalse(Rational.POSITIVE_INFINITY.isFinite());
         Assertions.assertTrue(Rational.POSITIVE_INFINITY.isInfinite());
-        Assertions.assertFalse(Rational.POSITIVE_INFINITY.isNan());
+        Assertions.assertFalse(Rational.POSITIVE_INFINITY.isNaN());
         // -Inf
         Assertions.assertFalse(Rational.NEGATIVE_INFINITY.isFinite());
         Assertions.assertTrue(Rational.NEGATIVE_INFINITY.isInfinite());
-        Assertions.assertFalse(Rational.NEGATIVE_INFINITY.isNan());
+        Assertions.assertFalse(Rational.NEGATIVE_INFINITY.isNaN());
         // NaN
         Assertions.assertFalse(Rational.NaN.isFinite());
         Assertions.assertFalse(Rational.NaN.isInfinite());
-        Assertions.assertTrue(Rational.NaN.isNan());
+        Assertions.assertTrue(Rational.NaN.isNaN());
 
         // equals
         Assertions.assertEquals(Rational.of(4, 4), Rational.ONE);
