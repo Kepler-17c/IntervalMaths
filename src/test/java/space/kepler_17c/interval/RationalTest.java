@@ -145,27 +145,57 @@ class RationalTest {
     }
 
     @Test
-    public void comparisonsTest() {
-        // zero
+    public void propertyChecksTest() {
         Assertions.assertTrue(Rational.ZERO.isFinite());
         Assertions.assertFalse(Rational.ZERO.isInfinite());
         Assertions.assertFalse(Rational.ZERO.isNaN());
-        // one
+        Assertions.assertTrue(Rational.ZERO.isInteger());
         Assertions.assertTrue(Rational.ONE.isFinite());
         Assertions.assertFalse(Rational.ONE.isInfinite());
         Assertions.assertFalse(Rational.ONE.isNaN());
-        // +Inf
+        Assertions.assertTrue(Rational.ONE.isInteger());
+        Assertions.assertTrue(Rational.TWO.isFinite());
+        Assertions.assertFalse(Rational.TWO.isInfinite());
+        Assertions.assertFalse(Rational.TWO.isNaN());
+        Assertions.assertTrue(Rational.TWO.isInteger());
+        Assertions.assertTrue(Rational.ONE.divide(Rational.TWO).isFinite());
+        Assertions.assertFalse(Rational.ONE.divide(Rational.TWO).isInfinite());
+        Assertions.assertFalse(Rational.ONE.divide(Rational.TWO).isNaN());
+        Assertions.assertFalse(Rational.ONE.divide(Rational.TWO).isInteger());
         Assertions.assertFalse(Rational.POSITIVE_INFINITY.isFinite());
         Assertions.assertTrue(Rational.POSITIVE_INFINITY.isInfinite());
         Assertions.assertFalse(Rational.POSITIVE_INFINITY.isNaN());
-        // -Inf
+        Assertions.assertFalse(Rational.POSITIVE_INFINITY.isInteger());
         Assertions.assertFalse(Rational.NEGATIVE_INFINITY.isFinite());
         Assertions.assertTrue(Rational.NEGATIVE_INFINITY.isInfinite());
         Assertions.assertFalse(Rational.NEGATIVE_INFINITY.isNaN());
-        // NaN
+        Assertions.assertFalse(Rational.NEGATIVE_INFINITY.isInteger());
         Assertions.assertFalse(Rational.NaN.isFinite());
         Assertions.assertFalse(Rational.NaN.isInfinite());
         Assertions.assertTrue(Rational.NaN.isNaN());
+        Assertions.assertFalse(Rational.NaN.isInteger());
+        Assertions.assertEquals(1, Rational.ONE.signum());
+        Assertions.assertEquals(0, Rational.ZERO.signum());
+        Assertions.assertEquals(-1, Rational.ONE.negate().signum());
+        Assertions.assertEquals(Rational.ONE, Rational.ONE.abs());
+        Assertions.assertEquals(Rational.ONE, Rational.ONE.negate().abs());
+    }
+
+    @Test
+    public void comparisonsTest() {
+        // named comparisons
+        Assertions.assertTrue(Rational.TWO.isGreaterThan(Rational.ONE));
+        Assertions.assertFalse(Rational.TWO.isGreaterThan(Rational.TWO));
+        Assertions.assertFalse(Rational.ONE.isGreaterThan(Rational.TWO));
+        Assertions.assertTrue(Rational.TWO.isGreaterOrEqualTo(Rational.ONE));
+        Assertions.assertTrue(Rational.TWO.isGreaterOrEqualTo(Rational.TWO));
+        Assertions.assertFalse(Rational.ONE.isGreaterOrEqualTo(Rational.TWO));
+        Assertions.assertFalse(Rational.TWO.isLessThan(Rational.ONE));
+        Assertions.assertFalse(Rational.TWO.isLessThan(Rational.TWO));
+        Assertions.assertTrue(Rational.ONE.isLessThan(Rational.TWO));
+        Assertions.assertFalse(Rational.TWO.isLessOrEqualTo(Rational.ONE));
+        Assertions.assertTrue(Rational.TWO.isLessOrEqualTo(Rational.TWO));
+        Assertions.assertTrue(Rational.ONE.isLessOrEqualTo(Rational.TWO));
 
         // equals
         Assertions.assertEquals(Rational.of(4, 4), Rational.ONE);
@@ -225,6 +255,20 @@ class RationalTest {
         inspectRational(1, 2, Rational.of(-2, -4));
         inspectRational(3, 7, Rational.of(3, 7));
         inspectRational(5, 1, Rational.of(5, 1));
+    }
+
+    @Test
+    public void minMaxTest() {
+        // min
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.min());
+        Assertions.assertEquals(Rational.ONE, Rational.min(Rational.ONE));
+        Assertions.assertEquals(Rational.ONE, Rational.min(Rational.ONE, Rational.TWO));
+        Assertions.assertEquals(Rational.ONE, Rational.min(Rational.TWO, Rational.ONE));
+        // max
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.max());
+        Assertions.assertEquals(Rational.ONE, Rational.max(Rational.ONE));
+        Assertions.assertEquals(Rational.TWO, Rational.max(Rational.ONE, Rational.TWO));
+        Assertions.assertEquals(Rational.TWO, Rational.max(Rational.TWO, Rational.ONE));
     }
 
     @Test

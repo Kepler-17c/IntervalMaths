@@ -1,6 +1,7 @@
 package space.kepler_17c.interval;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Rational implements Comparable<Rational> {
@@ -67,12 +68,36 @@ public class Rational implements Comparable<Rational> {
         return numerator.equals(BigInteger.ZERO) && denominator.equals(BigInteger.ZERO);
     }
 
+    public boolean isInteger() {
+        return denominator.equals(BigInteger.ONE);
+    }
+
     public int signum() {
         return numerator.signum();
     }
 
     public Rational negate() {
         return new Rational(numerator.negate(), denominator);
+    }
+
+    public Rational abs() {
+        return signum() < 0 ? negate() : this;
+    }
+
+    public boolean isGreaterThan(Rational other) {
+        return this.compareTo(other) > 0;
+    }
+
+    public boolean isGreaterOrEqualTo(Rational other) {
+        return this.compareTo(other) >= 0;
+    }
+
+    public boolean isLessThan(Rational other) {
+        return this.compareTo(other) < 0;
+    }
+
+    public boolean isLessOrEqualTo(Rational other) {
+        return this.compareTo(other) <= 0;
     }
 
     @Override
@@ -152,6 +177,14 @@ public class Rational implements Comparable<Rational> {
             }
             return new Rational(tmpNum, tmpDen);
         }
+    }
+
+    public static Rational min(Rational... values) {
+        return Arrays.stream(values).min(Rational::compareTo).orElse(Rational.POSITIVE_INFINITY);
+    }
+
+    public static Rational max(Rational... values) {
+        return Arrays.stream(values).max(Rational::compareTo).orElse(Rational.NEGATIVE_INFINITY);
     }
 
     public static Rational of(BigInteger numerator, BigInteger denominator) {
