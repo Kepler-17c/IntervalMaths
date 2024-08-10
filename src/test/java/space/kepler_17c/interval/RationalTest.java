@@ -248,6 +248,40 @@ class RationalTest {
     }
 
     @Test
+    public void toDecimalStringTest() {
+        Assertions.assertEquals("0", Rational.ZERO.toDecimalString(16));
+        Assertions.assertEquals("1", Rational.ONE.toDecimalString(16));
+        Assertions.assertEquals("2", Rational.TWO.toDecimalString(16));
+        Assertions.assertEquals("10", Rational.TEN.toDecimalString(16));
+        Assertions.assertEquals("0.3333333333333333", Rational.of(1, 3).toDecimalString(16));
+        Assertions.assertEquals("0.2500000000000000", Rational.of(1, 4).toDecimalString(16));
+        Assertions.assertEquals("0.6666666666666666", Rational.of(2, 3).toDecimalString(16));
+        Assertions.assertEquals("Infinity", Rational.POSITIVE_INFINITY.toDecimalString(16));
+        Assertions.assertEquals("-Infinity", Rational.NEGATIVE_INFINITY.toDecimalString(16));
+        Assertions.assertEquals("NaN", Rational.NaN.toDecimalString(16));
+        Assertions.assertEquals("0", Rational.ZERO.toDecimalString(16, true));
+        Assertions.assertEquals("1", Rational.ONE.toDecimalString(16, true));
+        Assertions.assertEquals("2", Rational.TWO.toDecimalString(16, true));
+        Assertions.assertEquals("10", Rational.TEN.toDecimalString(16, true));
+        Assertions.assertEquals("0.3333333333333333", Rational.of(1, 3).toDecimalString(16, true));
+        Assertions.assertEquals("0.25", Rational.of(1, 4).toDecimalString(16, true));
+        Assertions.assertEquals("0.6666666666666666", Rational.of(2, 3).toDecimalString(16, true));
+        Assertions.assertEquals("Infinity", Rational.POSITIVE_INFINITY.toDecimalString(16, true));
+        Assertions.assertEquals("-Infinity", Rational.NEGATIVE_INFINITY.toDecimalString(16, true));
+        Assertions.assertEquals("NaN", Rational.NaN.toDecimalString(16, true));
+        Assertions.assertEquals("0", Rational.ZERO.toDecimalString(16, false));
+        Assertions.assertEquals("1", Rational.ONE.toDecimalString(16, false));
+        Assertions.assertEquals("2", Rational.TWO.toDecimalString(16, false));
+        Assertions.assertEquals("10", Rational.TEN.toDecimalString(16, false));
+        Assertions.assertEquals("0.3333333333333333", Rational.of(1, 3).toDecimalString(16, false));
+        Assertions.assertEquals("0.2500000000000000", Rational.of(1, 4).toDecimalString(16, false));
+        Assertions.assertEquals("0.6666666666666666", Rational.of(2, 3).toDecimalString(16, false));
+        Assertions.assertEquals("Infinity", Rational.POSITIVE_INFINITY.toDecimalString(16, false));
+        Assertions.assertEquals("-Infinity", Rational.NEGATIVE_INFINITY.toDecimalString(16, false));
+        Assertions.assertEquals("NaN", Rational.NaN.toDecimalString(16, false));
+    }
+
+    @Test
     public void normaliseFractionTest() {
         inspectRational(1, 2, Rational.of(2, 4));
         inspectRational(-1, 2, Rational.of(2, -4));
@@ -273,13 +307,37 @@ class RationalTest {
 
     @Test
     public void factoryFunctionsTest() {
-        inspectRational(42, 1, Rational.of(42));
-        inspectRational(-42, 1, Rational.of(-42));
+        inspectRational(1, 10, Rational.of(BigInteger.ONE, BigInteger.TEN));
+        inspectRational(-2, 3, Rational.of(BigInteger.TWO.negate(), BigInteger.valueOf(3)));
+        inspectRational(5, 6, Rational.of(5, 6));
+        inspectRational(-7, 4, Rational.of(7, -4));
+        inspectRational(2, 1, Rational.of(BigInteger.TWO));
+        inspectRational(31, 1, Rational.of(31));
+        inspectRational(-17, 1, Rational.of(-17));
         inspectRational(1L << 40, 1, Rational.of(Math.pow(2, 40)));
         inspectRational(1, 1L << 40, Rational.of(Math.pow(2, -40)));
+        Assertions.assertEquals("3.14159265", Rational.of(Math.PI).toDecimalString(8));
         Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.of(Double.POSITIVE_INFINITY));
         Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.of(Double.NEGATIVE_INFINITY));
         Assertions.assertEquals(Rational.NaN, Rational.of(Double.NaN));
+        Assertions.assertThrows(NumberFormatException.class, () -> Rational.of(""));
+        Assertions.assertEquals(Rational.NaN, Rational.of("NaN"));
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.of("Infinity"));
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.of("+Infinity"));
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.of("-Infinity"));
+        Assertions.assertThrows(NumberFormatException.class, () -> Rational.of("."));
+        Assertions.assertEquals(Rational.ZERO, Rational.of("0"));
+        Assertions.assertEquals(Rational.ZERO, Rational.of("-0"));
+        Assertions.assertEquals(Rational.ZERO, Rational.of("0."));
+        Assertions.assertEquals(Rational.ZERO, Rational.of(".0"));
+        Assertions.assertEquals(Rational.ZERO, Rational.of("0.0"));
+        Assertions.assertEquals(Rational.of(123), Rational.of("123"));
+        Assertions.assertEquals(Rational.of(-123), Rational.of("-123"));
+        Assertions.assertEquals(Rational.of(314159, 100000), Rational.of("3.14159"));
+        Assertions.assertEquals(Rational.of(314159, 10), Rational.of("314.159E2"));
+        Assertions.assertEquals(Rational.of(1, 10000), Rational.of("1e-4"));
+        Assertions.assertEquals(Rational.of(-123, 10000), Rational.of("-1.23E-2"));
+        Assertions.assertThrows(NumberFormatException.class, () -> Rational.of(".5e"));
     }
 
     private static void inspectRational(long expectedNumerator, long expectedDenominator, Rational actual) {
