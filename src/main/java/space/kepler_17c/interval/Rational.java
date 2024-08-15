@@ -9,6 +9,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Rational implements Comparable<Rational> {
+    private static final String INFINITY_STR = "Infinity";
+    private static final String NaN_STR = "NaN";
+    private static final char DECIMAL_SEPARATOR = '.';
+    private static final Character[] SIGN_CHARS = {'+', '-'};
+    private static final Character[] EXPONENT_PREFIX_CHARS = {'e', 'E'};
+
     public static final Rational ZERO = new Rational(BigInteger.ZERO, BigInteger.ONE);
     public static final Rational ONE = new Rational(BigInteger.ONE, BigInteger.ONE);
     public static final Rational TWO = new Rational(BigInteger.TWO, BigInteger.ONE);
@@ -172,15 +178,15 @@ public class Rational implements Comparable<Rational> {
             return numerator + "/" + denominator;
         }
         if (isInfinite()) {
-            return signum() > 0 ? "Infinity" : "-Infinity";
+            return (signum() < 0 ? "-" : "") + INFINITY_STR;
         }
-        return "NaN";
+        return NaN_STR;
     }
 
     public String toDecimalString(int digits, boolean cutTrailingZeros) {
         String raw = toDecimalString(digits);
         int decimalPointIndex;
-        if (cutTrailingZeros && (decimalPointIndex = raw.indexOf('.')) >= 0) {
+        if (cutTrailingZeros && (decimalPointIndex = raw.indexOf(DECIMAL_SEPARATOR)) >= 0) {
             int lastNonZeroDigitIndex = -1;
             for (int i = raw.length() - 1; i >= 0; i--) {
                 if (raw.charAt(i) != '0') {
@@ -200,13 +206,14 @@ public class Rational implements Comparable<Rational> {
                 return numerator.toString();
             }
             BigInteger[] divisionResult = numerator.divideAndRemainder(denominator);
-            return divisionResult[0] + "."
+            return divisionResult[0]
+                    + String.valueOf(DECIMAL_SEPARATOR)
                     + divisionResult[1].multiply(BigInteger.TEN.pow(digits)).divide(denominator);
         }
         if (isInfinite()) {
-            return signum() > 0 ? "Infinity" : "-Infinity";
+            return (signum() < 0 ? "-" : "") + INFINITY_STR;
         }
-        return "NaN";
+        return NaN_STR;
     }
 
     private Rational normaliseFraction() {
@@ -298,11 +305,24 @@ public class Rational implements Comparable<Rational> {
         if (value.isEmpty()) {
             throw new NumberFormatException("Cannot parse empty string");
         }
-        if (value.equals("NaN")) {
+        if (value.equals(NaN_STR)) {
             return NaN;
         }
-        if (value.matches("[+\\-]?Infinity")) {
-            return value.startsWith("-") ? NEGATIVE_INFINITY : POSITIVE_INFINITY;
+        if (value.endsWith(INFINITY_STR)) {
+            if (value.length() == INFINITY_STR.length()) {
+                return POSITIVE_INFINITY;
+            }
+            if (value.length() == INFINITY_STR.length() + 1) {
+                switch (value.charAt(0)) {
+                    case '+':
+                        return POSITIVE_INFINITY;
+                    case '-':
+                        return NEGATIVE_INFINITY;
+                    default:
+                        // fall through to exception
+                }
+            }
+            throw new NumberFormatException("Malformed " + INFINITY_STR + " term");
         }
         // prepare readers for single chars or digit groups
         AtomicInteger index = new AtomicInteger();
@@ -332,17 +352,18 @@ public class Rational implements Comparable<Rational> {
             return value.substring(start, end);
         };
         // read significand
-        Optional<Character> sign = charReader.apply(new Character[] {'+', '-'});
+        Optional<Character> sign = charReader.apply(SIGN_CHARS);
         String integerPart = digitReader.get();
-        String fractionPart = charReader.apply(new Character[] {'.'}).isPresent() ? digitReader.get() : "";
+        String fractionPart =
+                charReader.apply(new Character[] {DECIMAL_SEPARATOR}).isPresent() ? digitReader.get() : "";
         if (integerPart.isEmpty() && fractionPart.isEmpty()) {
             throw new NumberFormatException("Malformed integer & fraction part");
         }
         // read exponent
         Optional<Character> exponentSign = Optional.empty();
         String exponent = "";
-        if (charReader.apply(new Character[] {'e', 'E'}).isPresent()) {
-            exponentSign = charReader.apply(new Character[] {'+', '-'});
+        if (charReader.apply(EXPONENT_PREFIX_CHARS).isPresent()) {
+            exponentSign = charReader.apply(SIGN_CHARS);
             exponent = digitReader.get();
             if (exponent.isEmpty()) {
                 throw new NumberFormatException("Malformed exponent");
