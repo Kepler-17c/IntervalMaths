@@ -187,8 +187,8 @@ public class Rational implements Comparable<Rational> {
         String raw = toDecimalString(digits);
         int decimalPointIndex;
         if (cutTrailingZeros && (decimalPointIndex = raw.indexOf(DECIMAL_SEPARATOR)) >= 0) {
-            int lastNonZeroDigitIndex = -1;
-            for (int i = raw.length() - 1; i >= 0; i--) {
+            int lastNonZeroDigitIndex;
+            for (int i = raw.length() - 1; ; i--) {
                 if (raw.charAt(i) != '0') {
                     lastNonZeroDigitIndex = i;
                     break;
@@ -208,7 +208,10 @@ public class Rational implements Comparable<Rational> {
             BigInteger[] divisionResult = numerator.divideAndRemainder(denominator);
             return divisionResult[0]
                     + String.valueOf(DECIMAL_SEPARATOR)
-                    + divisionResult[1].multiply(BigInteger.TEN.pow(digits)).divide(denominator);
+                    + divisionResult[1]
+                            .abs()
+                            .multiply(BigInteger.TEN.pow(digits))
+                            .divide(denominator);
         }
         if (isInfinite()) {
             return (signum() < 0 ? "-" : "") + INFINITY_STR;
@@ -295,7 +298,7 @@ public class Rational implements Comparable<Rational> {
                     .normaliseFraction();
         }
         if (Double.isInfinite(value)) {
-            return value > .0 ? POSITIVE_INFINITY : NEGATIVE_INFINITY;
+            return Math.signum(value) > 0 ? POSITIVE_INFINITY : NEGATIVE_INFINITY;
         }
         return NaN;
     }

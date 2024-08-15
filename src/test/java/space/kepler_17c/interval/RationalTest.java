@@ -2,6 +2,7 @@ package space.kepler_17c.interval;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
@@ -225,15 +226,6 @@ class RationalTest {
         Assertions.assertTrue(Rational.TWO.isLessOrEqualTo(Rational.TWO));
         Assertions.assertTrue(Rational.ONE.isLessOrEqualTo(Rational.TWO));
 
-        // equals
-        Assertions.assertEquals(Rational.of(4, 4), Rational.ONE);
-        Assertions.assertEquals(Rational.of(1, -1), Rational.ONE.negate());
-        Assertions.assertEquals(Rational.of(2, 0), Rational.POSITIVE_INFINITY);
-        Assertions.assertEquals(Rational.of(-2, 0), Rational.NEGATIVE_INFINITY);
-        Assertions.assertEquals(Rational.of(0, 0), Rational.NaN);
-        Assertions.assertEquals(Rational.of(8, 4), Rational.TWO);
-        Assertions.assertEquals(Rational.of(100, 10), Rational.TEN);
-
         // compareTo
         List<Rational> orderedTestValues = List.of(
                 Rational.NaN,
@@ -253,6 +245,7 @@ class RationalTest {
                 Rational.POSITIVE_INFINITY);
         for (int i = 0; i < orderedTestValues.size(); i++) {
             Rational rational = orderedTestValues.get(i);
+            Assertions.assertEquals(0, orderedTestValues.get(i).compareTo(rational));
             orderedTestValues.subList(0, i).forEach(r -> {
                 Assertions.assertEquals(1, rational.compareTo(r), "Comparing " + rational + " to " + r);
                 Assertions.assertEquals(-1, r.compareTo(rational), "Comparing " + r + " to " + rational);
@@ -262,6 +255,22 @@ class RationalTest {
                 Assertions.assertEquals(1, r.compareTo(rational), "Comparing " + r + " to " + rational);
             });
         }
+
+        // equals
+        Assertions.assertEquals(Rational.of(4, 4), Rational.ONE);
+        Assertions.assertEquals(Rational.of(1, -1), Rational.ONE.negate());
+        Assertions.assertEquals(Rational.of(2, 0), Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Rational.of(-2, 0), Rational.NEGATIVE_INFINITY);
+        Assertions.assertEquals(Rational.of(0, 0), Rational.NaN);
+        Assertions.assertEquals(Rational.of(8, 4), Rational.TWO);
+        Assertions.assertEquals(Rational.of(100, 10), Rational.TEN);
+        Assertions.assertNotEquals(Rational.ZERO, new Object());
+
+        // hashCode
+        Assertions.assertEquals(Objects.hash(0, 1), Rational.ZERO.hashCode());
+        Assertions.assertEquals(Objects.hash(1, 1), Rational.ONE.hashCode());
+        Assertions.assertEquals(Objects.hash(1, 0), Rational.POSITIVE_INFINITY.hashCode());
+        Assertions.assertNotEquals(Rational.NaN.hashCode(), Rational.ZERO.hashCode());
     }
 
     @Test
@@ -345,6 +354,9 @@ class RationalTest {
         inspectRational(1L << 40, 1, Rational.of(Math.pow(2, 40)));
         inspectRational(1, 1L << 40, Rational.of(Math.pow(2, -40)));
         Assertions.assertEquals("3.14159265", Rational.of(Math.PI).toDecimalString(8));
+        Assertions.assertEquals("-3.14159265", Rational.of(-Math.PI).toDecimalString(8));
+        Assertions.assertEquals(Rational.of(BigInteger.TWO.pow(100), BigInteger.ONE), Rational.of(Math.pow(2, 100)));
+        Assertions.assertEquals(Rational.of(BigInteger.ONE, BigInteger.TWO.pow(1030)), Rational.of(Math.pow(2, -1030)));
         Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.of(Double.POSITIVE_INFINITY));
         Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.of(Double.NEGATIVE_INFINITY));
         Assertions.assertEquals(Rational.NaN, Rational.of(Double.NaN));
@@ -353,6 +365,9 @@ class RationalTest {
         Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.of("Infinity"));
         Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.of("+Infinity"));
         Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.of("-Infinity"));
+        Assertions.assertThrows(NumberFormatException.class, () -> Rational.of("--Infinity"));
+        Assertions.assertThrows(NumberFormatException.class, () -> Rational.of(" Infinity"));
+        Assertions.assertThrows(NumberFormatException.class, () -> Rational.of("Inifnity"));
         Assertions.assertThrows(NumberFormatException.class, () -> Rational.of("."));
         Assertions.assertEquals(Rational.ZERO, Rational.of("0"));
         Assertions.assertEquals(Rational.ZERO, Rational.of("-0"));
@@ -363,6 +378,7 @@ class RationalTest {
         Assertions.assertEquals(Rational.of(-123), Rational.of("-123"));
         Assertions.assertEquals(Rational.of(314159, 100000), Rational.of("3.14159"));
         Assertions.assertEquals(Rational.of(314159, 10), Rational.of("314.159E2"));
+        Assertions.assertEquals(Rational.of(10000, 1), Rational.of("1e4"));
         Assertions.assertEquals(Rational.of(1, 10000), Rational.of("1e-4"));
         Assertions.assertEquals(Rational.of(-123, 10000), Rational.of("-1.23E-2"));
         Assertions.assertThrows(NumberFormatException.class, () -> Rational.of(".5e"));
