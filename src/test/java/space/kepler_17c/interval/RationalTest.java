@@ -1,12 +1,13 @@
 package space.kepler_17c.interval;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Supplier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 class RationalTest {
     @Test
@@ -293,6 +294,7 @@ class RationalTest {
         Assertions.assertEquals("0.3333333333333333", Rational.of(1, 3).toDecimalString(16));
         Assertions.assertEquals("0.2500000000000000", Rational.of(1, 4).toDecimalString(16));
         Assertions.assertEquals("0.6666666666666666", Rational.of(2, 3).toDecimalString(16));
+        Assertions.assertEquals("0.0010000000000000", Rational.of(1, 1000).toDecimalString(16));
         Assertions.assertEquals("Infinity", Rational.POSITIVE_INFINITY.toDecimalString(16));
         Assertions.assertEquals("-Infinity", Rational.NEGATIVE_INFINITY.toDecimalString(16));
         Assertions.assertEquals("NaN", Rational.NaN.toDecimalString(16));

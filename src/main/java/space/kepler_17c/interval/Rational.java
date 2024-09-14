@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Rational implements Comparable<Rational> {
     private static final String INFINITY_STR = "Infinity";
@@ -206,12 +208,17 @@ public class Rational implements Comparable<Rational> {
                 return numerator.toString();
             }
             BigInteger[] divisionResult = numerator.divideAndRemainder(denominator);
-            return divisionResult[0]
-                    + String.valueOf(DECIMAL_SEPARATOR)
-                    + divisionResult[1]
-                            .abs()
-                            .multiply(BigInteger.TEN.pow(digits))
-                            .divide(denominator);
+            String integerPart = divisionResult[0].toString();
+            String fractionPart = divisionResult[1]
+                    .abs()
+                    .multiply(BigInteger.TEN.pow(digits))
+                    .divide(denominator)
+                    .toString();
+            String leadingZeros = IntStream.range(0, digits - fractionPart.length())
+                    .map(i -> 0)
+                    .mapToObj(Integer::toString)
+                    .collect(Collectors.joining());
+            return integerPart + DECIMAL_SEPARATOR + leadingZeros + fractionPart;
         }
         if (isInfinite()) {
             return (signum() < 0 ? "-" : "") + INFINITY_STR;
