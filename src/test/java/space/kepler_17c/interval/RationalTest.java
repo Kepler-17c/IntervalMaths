@@ -138,6 +138,33 @@ class RationalTest {
     }
 
     @Test
+    public void powTest() {
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.pow(0));
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.pow(2));
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.pow(3));
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.pow(-2));
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.pow(-3));
+        Assertions.assertEquals(Rational.ONE, Rational.POSITIVE_INFINITY.pow(0));
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.POSITIVE_INFINITY.pow(2));
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.POSITIVE_INFINITY.pow(3));
+        Assertions.assertEquals(Rational.ZERO, Rational.POSITIVE_INFINITY.pow(-2));
+        Assertions.assertEquals(Rational.ZERO, Rational.POSITIVE_INFINITY.pow(-3));
+        Assertions.assertEquals(Rational.ONE, Rational.NEGATIVE_INFINITY.pow(0));
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.NEGATIVE_INFINITY.pow(2));
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.NEGATIVE_INFINITY.pow(3));
+        Assertions.assertEquals(Rational.ZERO, Rational.NEGATIVE_INFINITY.pow(-2));
+        Assertions.assertEquals(Rational.ZERO, Rational.NEGATIVE_INFINITY.pow(-3));
+        Assertions.assertEquals(Rational.NaN, Rational.ZERO.pow(0));
+        Assertions.assertEquals(Rational.ZERO, Rational.ZERO.pow(1));
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.ZERO.pow(-1));
+        Assertions.assertEquals(Rational.ONE, Rational.TWO.pow(0));
+        Assertions.assertEquals(Rational.TWO, Rational.TWO.pow(1));
+        Assertions.assertEquals(Rational.of(16), Rational.TWO.pow(4));
+        Assertions.assertEquals(Rational.of(1, 16), Rational.TWO.pow(-4));
+        Assertions.assertEquals(Rational.of(32), Rational.TWO.pow(5));
+    }
+
+    @Test
     public void inverseTest() {
         Assertions.assertEquals(Rational.ONE, Rational.ONE.inverse());
         Assertions.assertEquals(Rational.TWO, Rational.TWO.inverse().inverse());

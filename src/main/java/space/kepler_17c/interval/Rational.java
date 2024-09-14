@@ -64,6 +64,35 @@ public class Rational implements Comparable<Rational> {
         return this.multiply(new Rational(other.denominator, other.numerator));
     }
 
+    public Rational pow(int exponent) {
+        if (isNaN()) {
+            return NaN;
+        }
+        if (isInfinite()) {
+            if (exponent == 0) {
+                return ONE;
+            }
+            if (exponent < 0) {
+                return ZERO;
+            }
+            return signum() < 0 ? (exponent % 2 == 0 ? POSITIVE_INFINITY : NEGATIVE_INFINITY) : POSITIVE_INFINITY;
+        }
+        if (exponent < 0) {
+            return inverse().pow(-exponent);
+        }
+        if (exponent == 0) {
+            return equals(ZERO) ? NaN : Rational.ONE;
+        }
+        Rational result = Rational.ONE;
+        for (int mask = Integer.highestOneBit(exponent); mask != 0; mask >>>= 1) {
+            result = result.multiply(result);
+            if ((exponent & mask) != 0) {
+                result = result.multiply(this);
+            }
+        }
+        return result;
+    }
+
     public Rational inverse() {
         return new Rational(denominator, numerator).normaliseFraction();
     }
@@ -299,9 +328,8 @@ public class Rational implements Comparable<Rational> {
             // build fraction
             BigInteger numerator = sign ? BigInteger.valueOf(-mantissa) : BigInteger.valueOf(mantissa);
             BigInteger denominator = BigInteger.ONE;
-            return (exponent > 0
-                            ? new Rational(numerator.shiftLeft(exponent), denominator)
-                            : new Rational(numerator, denominator.shiftLeft(-exponent)))
+            return new Rational(numerator, denominator)
+                    .multiply(Rational.TWO.pow(exponent))
                     .normaliseFraction();
         }
         if (Double.isInfinite(value)) {
@@ -387,9 +415,7 @@ public class Rational implements Comparable<Rational> {
             effectiveExponent = Integer.parseInt(exponentSign.orElse('+') + exponent);
         }
         effectiveExponent -= fractionPart.length();
-        Rational magnitudeFactor = effectiveExponent > 0
-                ? Rational.of(BigInteger.TEN.pow(effectiveExponent))
-                : Rational.of(BigInteger.ONE, BigInteger.TEN.pow(-effectiveExponent));
+        Rational magnitudeFactor = Rational.TEN.pow(effectiveExponent);
         return Rational.of(new BigInteger(sign.orElse('+') + integerPart + fractionPart))
                 .multiply(magnitudeFactor);
     }
