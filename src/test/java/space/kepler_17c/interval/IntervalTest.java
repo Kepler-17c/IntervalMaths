@@ -7,6 +7,24 @@ import org.junit.jupiter.api.Test;
 
 class IntervalTest {
     @Test
+    public void constantsTest() {
+        Assertions.assertEquals(Rational.ZERO, Interval.ZERO.min);
+        Assertions.assertEquals(Rational.ZERO, Interval.ZERO.max);
+        Assertions.assertEquals(Rational.ONE, Interval.ONE.min);
+        Assertions.assertEquals(Rational.ONE, Interval.ONE.max);
+        Assertions.assertEquals(Rational.TWO, Interval.TWO.min);
+        Assertions.assertEquals(Rational.TWO, Interval.TWO.max);
+        Assertions.assertEquals(Rational.TEN, Interval.TEN.min);
+        Assertions.assertEquals(Rational.TEN, Interval.TEN.max);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Interval.POSITIVE_INFINITY.min);
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Interval.POSITIVE_INFINITY.max);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Interval.NEGATIVE_INFINITY.min);
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Interval.NEGATIVE_INFINITY.max);
+        Assertions.assertEquals(Rational.NaN, Interval.NaN.min);
+        Assertions.assertEquals(Rational.NaN, Interval.NaN.max);
+    }
+
+    @Test
     public void mathsTest() {
         // tmp variables
         Interval ivA, ivB;
@@ -214,6 +232,12 @@ class IntervalTest {
         interval = Interval.of(Rational.ONE, Rational.TWO.negate());
         Assertions.assertEquals(Rational.TWO.negate(), interval.min);
         Assertions.assertEquals(Rational.ONE, interval.max);
+        interval = Interval.of(Rational.NaN, Rational.ONE);
+        Assertions.assertEquals(Interval.NaN, interval);
+        interval = Interval.of(Rational.ONE, Rational.NaN);
+        Assertions.assertEquals(Interval.NaN, interval);
+        interval = Interval.of(Rational.NaN, Rational.NaN);
+        Assertions.assertEquals(Interval.NaN, interval);
         // from BigInteger
         interval = Interval.of(BigInteger.ZERO);
         Assertions.assertEquals(Rational.ZERO, interval.min);

@@ -7,8 +7,20 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 public class Interval implements Comparable<Interval> {
+    public static final Interval ZERO = new Interval(Rational.ZERO);
+    public static final Interval ONE = new Interval(Rational.ONE);
+    public static final Interval TWO = new Interval(Rational.TWO);
+    public static final Interval TEN = new Interval(Rational.TEN);
+    public static final Interval POSITIVE_INFINITY = new Interval(Rational.POSITIVE_INFINITY);
+    public static final Interval NEGATIVE_INFINITY = new Interval(Rational.NEGATIVE_INFINITY);
+    public static final Interval NaN = new Interval(Rational.NaN);
+
     public final Rational min;
     public final Rational max;
+
+    private Interval(Rational value) {
+        this(value, value);
+    }
 
     private Interval(Rational min, Rational max) {
         this.min = min;
@@ -39,9 +51,9 @@ public class Interval implements Comparable<Interval> {
         interimResults.add(operator.apply(this.max, other.max));
         interimResults.sort(Rational::compareTo);
         if (interimResults.get(0).equals(Rational.NaN)) {
-            return new Interval(Rational.NaN, Rational.NaN);
+            return NaN;
         }
-        return new Interval(interimResults.get(0), interimResults.get(3));
+        return Interval.of(interimResults.get(0), interimResults.get(3));
     }
 
     @Override
@@ -72,6 +84,9 @@ public class Interval implements Comparable<Interval> {
     }
 
     public static Interval of(Rational limitA, Rational limitB) {
+        if (limitA.isNaN() || limitB.isNaN()) {
+            return NaN;
+        }
         return limitA.compareTo(limitB) < 0 ? new Interval(limitA, limitB) : new Interval(limitB, limitA);
     }
 
@@ -88,7 +103,7 @@ public class Interval implements Comparable<Interval> {
     }
 
     public static Interval of(Rational value) {
-        return Interval.of(value, value);
+        return new Interval(value, value);
     }
 
     public static Interval of(BigInteger value) {
