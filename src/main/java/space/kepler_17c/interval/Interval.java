@@ -40,7 +40,7 @@ public class Interval implements Comparable<Interval> {
     }
 
     public Interval divide(Interval other) {
-        return calculate(other, Rational::divide);
+        return other.min.signum() != other.max.signum() ? NaN : calculate(other, Rational::divide);
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {

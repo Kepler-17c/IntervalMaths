@@ -175,14 +175,12 @@ class IntervalTest {
         Assertions.assertEquals(expected, actual);
         ivA = Interval.of(-6, 20);
         ivB = Interval.of(-15, 16);
-        expected = Interval.of(Rational.of(-4, 3), Rational.of(5, 4));
         actual = ivA.divide(ivB);
-        Assertions.assertEquals(expected, actual);
-        ivA = Interval.of(-20, 15);
+        Assertions.assertEquals(Interval.NaN, actual);
+        ivA = Interval.of(-20, -15);
         ivB = Interval.of(-16, 4);
-        expected = Interval.of(Rational.of(-5), Rational.of(15, 4));
         actual = ivA.divide(ivB);
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals(Interval.NaN, actual);
         ivA = Interval.of(-1, 6);
         ivB = Interval.of(14, 20);
         expected = Interval.of(Rational.of(-1, 14), Rational.of(6, 14));
@@ -193,6 +191,8 @@ class IntervalTest {
         expected = Interval.of(Rational.of(3, -14), Rational.of(5, 14));
         actual = ivA.divide(ivB);
         Assertions.assertEquals(expected, actual);
+        actual = Interval.ZERO.divide(Interval.ZERO);
+        Assertions.assertEquals(Interval.NaN, actual);
     }
 
     @Test
