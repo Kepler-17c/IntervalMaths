@@ -196,6 +196,105 @@ class IntervalTest {
     }
 
     @Test
+    public void negateTest() {
+        Interval expected, actual;
+        expected = Interval.of(-1);
+        actual = Interval.ONE.negate();
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(-1, 1);
+        actual = expected.negate();
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.ONE;
+        actual = Interval.of(-1).negate();
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(-3, 5);
+        actual = Interval.of(-5, 3).negate();
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(2, 3);
+        actual = Interval.of(-3, -2).negate();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void inverseTest() {
+        Interval expected, actual;
+        expected = Interval.ONE;
+        actual = Interval.ONE.inverse();
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(.5);
+        actual = Interval.TWO.inverse();
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(.25, .5);
+        actual = Interval.of(2, 4).inverse();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void avgTest() {
+        Rational expected, actual;
+        expected = Rational.ONE;
+        actual = Interval.ONE.avg();
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.of("5.5");
+        actual = Interval.of(1, 10).avg();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void uncertaintyTest() {
+        Rational expected, actual;
+        expected = Rational.ZERO;
+        actual = Interval.ONE.uncertainty();
+        Assertions.assertEquals(expected, actual);
+        expected = Rational.of(9);
+        actual = Interval.of(1, 10).uncertainty();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void mergeWithTest() {
+        Interval expected, actual;
+        expected = Interval.of(1, 10);
+        actual = Interval.ONE.mergeWith(Interval.TEN);
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(0, 10);
+        actual = Interval.ZERO.mergeWith(Interval.ONE).mergeWith(Interval.TWO).mergeWith(Interval.TEN);
+        Assertions.assertEquals(expected, actual);
+        expected = Interval.of(Rational.NEGATIVE_INFINITY, Rational.POSITIVE_INFINITY);
+        actual = Interval.NEGATIVE_INFINITY.mergeWith(Interval.POSITIVE_INFINITY);
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.ONE.mergeWith(Interval.NaN);
+        Assertions.assertEquals(Interval.NaN, actual);
+        actual = Interval.NaN.mergeWith(Interval.NaN);
+        Assertions.assertEquals(Interval.NaN, actual);
+        actual = Interval.NaN.mergeWith(Interval.NaN);
+        Assertions.assertEquals(Interval.NaN, actual);
+    }
+
+    @Test
+    public void containsTest() {
+        // contains Rational
+        Assertions.assertTrue(Interval.of(0, 2).contains(Rational.ZERO));
+        Assertions.assertTrue(Interval.of(0, 2).contains(Rational.ONE));
+        Assertions.assertTrue(Interval.of(0, 2).contains(Rational.TWO));
+        Assertions.assertFalse(Interval.of(0, 2).contains(Rational.TEN));
+        Assertions.assertFalse(Interval.of(0, 2).contains(Rational.NaN));
+        Assertions.assertFalse(Interval.NaN.contains(Rational.TWO));
+        Assertions.assertFalse(Interval.NaN.contains(Rational.NaN));
+        // contains Interval
+        Assertions.assertFalse(Interval.of(0, 2).contains(Interval.of(-1, 1)));
+        Assertions.assertFalse(Interval.of(0, 2).contains(Interval.of(-1, 2)));
+        Assertions.assertTrue(Interval.of(0, 2).contains(Interval.of(0, 2)));
+        Assertions.assertTrue(Interval.of(0, 2).contains(Interval.of(1, 2)));
+        Assertions.assertTrue(Interval.of(0, 2).contains(Interval.of(2)));
+        Assertions.assertFalse(Interval.of(0, 2).contains(Interval.of(2, 3)));
+        Assertions.assertFalse(Interval.of(0, 2).contains(Interval.of(-1, 3)));
+        Assertions.assertFalse(Interval.of(0, 2).contains(Interval.NaN));
+        Assertions.assertFalse(Interval.NaN.contains(Interval.of(1, 2)));
+        Assertions.assertFalse(Interval.NaN.contains(Interval.NaN));
+    }
+
+    @Test
     public void comparisonsTest() {
         List<Interval> orderedTestValues = List.of(
                 Interval.of(Rational.NEGATIVE_INFINITY),

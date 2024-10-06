@@ -43,6 +43,22 @@ public class Interval implements Comparable<Interval> {
         return other.min.signum() != other.max.signum() ? NaN : calculate(other, Rational::divide);
     }
 
+    public Interval negate() {
+        return Interval.of(min.negate(), max.negate());
+    }
+
+    public Interval inverse() {
+        return Interval.of(min.inverse(), max.inverse());
+    }
+
+    public Rational avg() {
+        return min.add(max).divide(Rational.TWO);
+    }
+
+    public Rational uncertainty() {
+        return max.subtract(min);
+    }
+
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
         List<Rational> interimResults = new ArrayList<>();
         interimResults.add(operator.apply(this.min, other.min));
@@ -54,6 +70,23 @@ public class Interval implements Comparable<Interval> {
             return NaN;
         }
         return Interval.of(interimResults.get(0), interimResults.get(3));
+    }
+
+    public Interval mergeWith(Interval other) {
+        return this.equals(NaN) || other.equals(NaN)
+                ? NaN
+                : Interval.of(Rational.min(this.min, other.min), Rational.max(this.max, other.max));
+    }
+
+    public boolean contains(Rational value) {
+        return !this.equals(NaN) && min.isLessOrEqualTo(value) && max.isGreaterOrEqualTo(value);
+    }
+
+    public boolean contains(Interval other) {
+        if (this.equals(NaN) || other.equals(NaN)) {
+            return false;
+        }
+        return min.isLessOrEqualTo(other.min) && max.isGreaterOrEqualTo(other.max);
     }
 
     @Override
