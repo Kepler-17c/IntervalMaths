@@ -322,6 +322,17 @@ class IntervalTest {
     }
 
     @Test
+    public void accuracyTest() {
+        int initialAccuracyBits = Interval.getAccuracyBits();
+        Interval.setAccuracyBits(1234);
+        Assertions.assertEquals(1234, Interval.getAccuracyBits());
+        Interval.setAccuracyBits(4321);
+        Assertions.assertEquals(4321, Interval.getAccuracyBits());
+        Interval.setAccuracyBits(initialAccuracyBits);
+        Assertions.assertEquals(initialAccuracyBits, Interval.getAccuracyBits());
+    }
+
+    @Test
     public void factoryFunctionsTest() {
         Interval interval;
         // from Rational

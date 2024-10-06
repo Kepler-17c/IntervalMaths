@@ -7,6 +7,17 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 public class Interval implements Comparable<Interval> {
+    // accuracy config
+    private static final int MINIMAL_BIT_COUNT = 64;
+    private static final int DEFAULT_BIT_COUNT = 2048;
+    private static int accuracyBitCount = 0;
+    private static Rational accuracy = Rational.ZERO;
+
+    static {
+        setAccuracyBits(DEFAULT_BIT_COUNT);
+    }
+
+    // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
     public static final Interval ONE = new Interval(Rational.ONE);
     public static final Interval TWO = new Interval(Rational.TWO);
@@ -69,7 +80,9 @@ public class Interval implements Comparable<Interval> {
         if (interimResults.get(0).equals(Rational.NaN)) {
             return NaN;
         }
-        return Interval.of(interimResults.get(0), interimResults.get(3));
+        return Interval.of(
+                interimResults.get(0).cutAccuracy(accuracyBitCount, false),
+                interimResults.get(3).cutAccuracy(accuracyBitCount, true));
     }
 
     public Interval mergeWith(Interval other) {
@@ -114,6 +127,19 @@ public class Interval implements Comparable<Interval> {
     @Override
     public String toString() {
         return "[" + min + ", " + max + "]";
+    }
+
+    public static void setAccuracyBits(int bitCount) {
+        accuracyBitCount = Math.max(bitCount, MINIMAL_BIT_COUNT);
+        accuracy = Rational.of(BigInteger.ONE.shiftLeft(accuracyBitCount)).inverse();
+    }
+
+    public static int getAccuracyBits() {
+        return accuracyBitCount;
+    }
+
+    public static Rational getAccuracy() {
+        return accuracy;
     }
 
     public static Interval of(Rational limitA, Rational limitB) {
