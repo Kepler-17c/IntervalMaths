@@ -315,6 +315,37 @@ class IntervalTest {
     }
 
     @Test
+    public void powTest() {
+        Interval pow;
+        Rational lower, upper;
+        Rational accuracyTolerance = Rational.TWO.pow(16);
+        // tests
+        pow = Interval.TWO.pow(Interval.TEN);
+        checkInterval(Rational.of(1024), pow, accuracyTolerance);
+        pow = Interval.TWO.pow(Interval.ONE.negate());
+        checkInterval(Rational.of(1, 2), pow, accuracyTolerance);
+        // special values
+        pow = Interval.ONE.negate().pow(Interval.ONE);
+        Assertions.assertEquals(Interval.NaN, pow);
+        pow = Interval.POSITIVE_INFINITY.pow(Interval.ONE);
+        Assertions.assertEquals(Interval.POSITIVE_INFINITY, pow);
+        pow = Interval.NEGATIVE_INFINITY.pow(Interval.ONE);
+        Assertions.assertEquals(Interval.NaN, pow);
+        pow = Interval.ZERO.pow(Interval.ONE);
+        Assertions.assertEquals(Interval.ZERO, pow);
+        pow = Interval.TWO.pow(Interval.ZERO);
+        Assertions.assertEquals(Interval.ONE, pow);
+        pow = Interval.ZERO.pow(Interval.ZERO);
+        Assertions.assertEquals(Interval.NaN, pow);
+        pow = Interval.NaN.pow(Interval.ONE);
+        Assertions.assertEquals(Interval.NaN, pow);
+        pow = Interval.ONE.pow(Interval.NaN);
+        Assertions.assertEquals(Interval.NaN, pow);
+        pow = Interval.NaN.pow(Interval.NaN);
+        Assertions.assertEquals(Interval.NaN, pow);
+    }
+
+    @Test
     public void mergeWithTest() {
         Interval expected, actual;
         expected = Interval.of(1, 10);
@@ -441,7 +472,10 @@ class IntervalTest {
     private static void checkInterval(Rational expectedValue, Interval actualInterval, Rational accuracyRatioLimit) {
         Assertions.assertTrue(actualInterval.contains(expectedValue));
         Rational accuracyRatio = actualInterval.uncertainty().divide(Interval.getAccuracy());
-        Assertions.assertTrue(accuracyRatio.isLessOrEqualTo(accuracyRatioLimit));
+        Assertions.assertTrue(
+                accuracyRatio.isLessOrEqualTo(accuracyRatioLimit),
+                "Accuracy ratio failed: expected less than " + accuracyRatioLimit.toDecimalString(8) + " but was "
+                        + accuracyRatio.toDecimalString(8));
     }
 
     private static void checkInterval(Rational expectedLower, Rational expectedUpper, Interval actualInterval) {

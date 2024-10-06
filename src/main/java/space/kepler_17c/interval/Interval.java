@@ -108,15 +108,15 @@ public class Interval implements Comparable<Interval> {
         }
         // derived from Taylor series
         Rational pow = Rational.ONE;
-        Rational factorial = Rational.ONE;
+        BigInteger factorial = BigInteger.ONE;
         int factorialCounter = 1;
         Rational result = Rational.ZERO;
         Rational interimResult;
         do {
-            interimResult = pow.divide(factorial);
-            result = result.add(interimResult);
-            pow = pow.multiply(value);
-            factorial = factorial.multiply(Rational.of(factorialCounter++));
+            interimResult = pow.divide(Rational.of(factorial)).cutAccuracy(accuracyBitCount * 2, false);
+            result = result.add(interimResult).cutAccuracy(accuracyBitCount * 2, false);
+            pow = pow.multiply(value).cutAccuracy(accuracyBitCount * 2, false);
+            factorial = factorial.multiply(BigInteger.valueOf(factorialCounter++));
         } while (interimResult.abs().compareTo(accuracy) > 0);
         return value.signum() < 0
                 ? Interval.of(result, result.subtract(interimResult))
@@ -219,6 +219,20 @@ public class Interval implements Comparable<Interval> {
 
     public Interval log10() {
         return log().divide(ln10());
+    }
+
+    public Interval pow(Interval other) {
+        if (this.min.isNaN() || this.max.isNaN() || other.min.isNaN() || other.max.isNaN()) {
+            return NaN;
+        }
+        if (this.min.signum() > 0) {
+            // a^b = e^(ln(a^b)) = e^(b*ln(a))
+            return this.log().multiply(other).exp();
+        }
+        if (this.min.signum() < 0) {
+            return NaN;
+        }
+        return other.contains(Rational.ZERO) ? NaN : ZERO;
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
