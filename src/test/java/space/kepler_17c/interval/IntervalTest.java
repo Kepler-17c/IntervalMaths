@@ -252,6 +252,24 @@ class IntervalTest {
     }
 
     @Test
+    public void sqrtTest() {
+        // tmp vars
+        Interval sqrt;
+        Rational lower, upper;
+        // tests
+        sqrt = Interval.TWO.sqrt();
+        lower = Rational.of("1.414213562373095048801688724209");
+        upper = Rational.of("1.41421356237309504880168872421");
+        checkInterval(lower, upper, sqrt);
+        sqrt = Interval.of(4).sqrt();
+        checkInterval(Rational.TWO, sqrt);
+        // special values
+        Assertions.assertEquals(Interval.NaN, Interval.NaN.sqrt());
+        Assertions.assertEquals(Interval.NaN, Interval.of(-1).sqrt());
+        Assertions.assertEquals(Interval.POSITIVE_INFINITY, Interval.POSITIVE_INFINITY.sqrt());
+    }
+
+    @Test
     public void mergeWithTest() {
         Interval expected, actual;
         expected = Interval.of(1, 10);
@@ -369,5 +387,26 @@ class IntervalTest {
         interval = Interval.of(.5, .75);
         Assertions.assertEquals(Rational.TWO.inverse(), interval.min);
         Assertions.assertEquals(Rational.of(3, 4), interval.max);
+    }
+
+    private static void checkInterval(Rational expectedValue, Interval actualInterval) {
+        checkInterval(expectedValue, actualInterval, Rational.ONE);
+    }
+
+    private static void checkInterval(Rational expectedValue, Interval actualInterval, Rational accuracyRatioLimit) {
+        Assertions.assertTrue(actualInterval.contains(expectedValue));
+        Rational accuracyRatio = actualInterval.uncertainty().divide(Interval.getAccuracy());
+        Assertions.assertTrue(accuracyRatio.isLessOrEqualTo(accuracyRatioLimit));
+    }
+
+    private static void checkInterval(Rational expectedLower, Rational expectedUpper, Interval actualInterval) {
+        checkInterval(expectedLower, expectedUpper, actualInterval, Rational.ONE);
+    }
+
+    private static void checkInterval(
+            Rational expectedLower, Rational expectedUpper, Interval actualInterval, Rational accuracyRatioLimit) {
+        Assertions.assertTrue(Interval.of(expectedLower, expectedUpper).contains(actualInterval));
+        Rational accuracyRatio = actualInterval.uncertainty().divide(Interval.getAccuracy());
+        Assertions.assertTrue(accuracyRatio.isLessOrEqualTo(accuracyRatioLimit));
     }
 }

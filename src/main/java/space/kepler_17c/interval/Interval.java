@@ -70,6 +70,26 @@ public class Interval implements Comparable<Interval> {
         return max.subtract(min);
     }
 
+    public Interval sqrt() {
+        return min.signum() < 0 || this.equals(NaN) ? NaN : sqrt(min).mergeWith(sqrt(max));
+    }
+
+    private static Interval sqrt(Rational value) {
+        if (value.isInfinite()) {
+            return POSITIVE_INFINITY;
+        }
+        // Newton's method
+        Rational result = value;
+        Rational next;
+        Rational diff;
+        do {
+            next = value.divide(result).add(result).divide(Rational.TWO);
+            diff = result.subtract(next);
+            result = next;
+        } while (diff.abs().compareTo(accuracy) > 0);
+        return Interval.of(result, result.subtract(diff));
+    }
+
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
         List<Rational> interimResults = new ArrayList<>();
         interimResults.add(operator.apply(this.min, other.min));
