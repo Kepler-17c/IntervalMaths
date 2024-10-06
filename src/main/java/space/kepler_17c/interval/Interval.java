@@ -22,6 +22,8 @@ public class Interval implements Comparable<Interval> {
     // constant caches
     private static final Map<Integer, Interval> SQRT_2 = new HashMap<>();
     private static final Map<Integer, Interval> LN_SQRT_2 = new HashMap<>();
+    private static final Map<Integer, Interval> LN_2 = new HashMap<>();
+    private static final Map<Integer, Interval> LN_10 = new HashMap<>();
 
     // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
@@ -195,6 +197,28 @@ public class Interval implements Comparable<Interval> {
             LN_SQRT_2.put(accuracyBitCount, sqrt2().log());
         }
         return LN_SQRT_2.get(accuracyBitCount);
+    }
+
+    private static Interval ln2() {
+        if (!LN_2.containsKey(accuracyBitCount)) {
+            LN_2.put(accuracyBitCount, log(Rational.TWO));
+        }
+        return LN_2.get(accuracyBitCount);
+    }
+
+    private static Interval ln10() {
+        if (!LN_10.containsKey(accuracyBitCount)) {
+            LN_10.put(accuracyBitCount, log(Rational.TEN));
+        }
+        return LN_10.get(accuracyBitCount);
+    }
+
+    public Interval log2() {
+        return log().divide(ln2());
+    }
+
+    public Interval log10() {
+        return log().divide(ln10());
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {

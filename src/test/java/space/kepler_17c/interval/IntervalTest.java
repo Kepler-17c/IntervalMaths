@@ -308,6 +308,10 @@ class IntervalTest {
         checkInterval(lower, upper, log, accuracyTolerance);
         log = Interval.ONE.exp().log();
         checkInterval(Rational.ONE, log, Rational.of(3));
+        log = Interval.of(1000000).log10();
+        checkInterval(Rational.of(6), log, accuracyTolerance);
+        log = Interval.of(Rational.of(BigInteger.ONE.shiftLeft(8))).log2();
+        checkInterval(Rational.of(8), log, accuracyTolerance);
     }
 
     @Test
