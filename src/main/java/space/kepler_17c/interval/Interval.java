@@ -2,7 +2,9 @@ package space.kepler_17c.interval;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
@@ -16,6 +18,10 @@ public class Interval implements Comparable<Interval> {
     static {
         setAccuracyBits(DEFAULT_BIT_COUNT);
     }
+
+    // constant caches
+    private static final Map<Integer, Interval> SQRT_2 = new HashMap<>();
+    private static final Map<Integer, Interval> LN_SQRT_2 = new HashMap<>();
 
     // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
@@ -113,6 +119,82 @@ public class Interval implements Comparable<Interval> {
         return value.signum() < 0
                 ? Interval.of(result, result.subtract(interimResult))
                 : Interval.of(result, result.add(interimResult));
+    }
+
+    public Interval log() {
+        return min.signum() < 0 || this.equals(NaN) ? NaN : log(min).mergeWith(log(max));
+    }
+
+    private static Interval log(Rational value) {
+        if (value.isInfinite()) {
+            return POSITIVE_INFINITY;
+        }
+        if (value.equals(Rational.ZERO)) {
+            return NEGATIVE_INFINITY;
+        }
+        /*
+         * based on ln(x) = 2*artanh((x-1)/(x+1)) = sum(k=0, inf, 2/(2k+1) * ((x-1)/(x+1))^(2k+1))
+         *
+         * the series is most efficient near 1, so the following transform is applied:
+         * ln(x) = ln(2^n / 2^n * x) = n*ln(2) + ln(x / 2^n)
+         * with ln(2) = 2*ln(sqrt(2)) this yields:
+         * ln(x) = 2n*ln(sqrt(2)) + ln(x / 2^n)
+         * => choose n such that (x / 2^n) lies in [1/sqrt(x), sqrt(x)]
+         *
+         * Reduce loop complexity by re-using the interim result as remainder term.
+         * Applying the transform above guarantees its absolute value will always be greater.
+         */
+        Interval optimalRange = new Interval(sqrt2().inverse().min, sqrt2().max);
+        boolean noTransform = optimalRange.contains(value);
+        int magnitude = value.magnitude();
+        Rational effectiveValue;
+        if (noTransform) {
+            effectiveValue = value;
+        } else {
+            Rational tmpEffective = value.divide(Rational.TWO.pow(magnitude));
+            while (tmpEffective.isLessThan(optimalRange.min)) {
+                tmpEffective = tmpEffective.multiply(Rational.TWO);
+                magnitude--;
+            }
+            while (tmpEffective.isGreaterThan(optimalRange.max)) {
+                tmpEffective = tmpEffective.divide(Rational.TWO);
+                magnitude++;
+            }
+            effectiveValue = tmpEffective;
+        }
+        // actual calculation
+        Rational result = Rational.ZERO;
+        Rational interimResult;
+        int index = 1;
+        Rational fractionPower = effectiveValue.subtract(Rational.ONE).divide(effectiveValue.add(Rational.ONE));
+        Rational fractionSquare = fractionPower.pow(2);
+        do {
+            // calc step
+            Rational indexInverse = Rational.TWO.divide(Rational.of(index));
+            interimResult = indexInverse.multiply(fractionPower);
+            result = result.add(interimResult).cutAccuracy(accuracyBitCount * 2, false);
+            // prepare next
+            fractionPower = fractionPower.multiply(fractionSquare).cutAccuracy(accuracyBitCount * 2, false);
+            index += 2;
+        } while (interimResult.abs().isGreaterThan(accuracy));
+        Interval resultInterval = Interval.of(result, result.add(interimResult));
+        return noTransform
+                ? resultInterval
+                : Interval.of(2L * magnitude).multiply(lnSqrt2()).add(resultInterval);
+    }
+
+    private static Interval sqrt2() {
+        if (!SQRT_2.containsKey(accuracyBitCount)) {
+            SQRT_2.put(accuracyBitCount, sqrt(Rational.TWO));
+        }
+        return SQRT_2.get(accuracyBitCount);
+    }
+
+    private static Interval lnSqrt2() {
+        if (!LN_SQRT_2.containsKey(accuracyBitCount)) {
+            LN_SQRT_2.put(accuracyBitCount, sqrt2().log());
+        }
+        return LN_SQRT_2.get(accuracyBitCount);
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {

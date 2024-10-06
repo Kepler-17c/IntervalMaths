@@ -148,6 +148,10 @@ public class Rational implements Comparable<Rational> {
                 : Rational.of(shiftedNum.subtract(BigInteger.ONE), shiftedDen);
     }
 
+    public int magnitude() {
+        return numerator.bitLength() - denominator.bitLength();
+    }
+
     public boolean isGreaterThan(Rational other) {
         return this.compareTo(other) > 0;
     }

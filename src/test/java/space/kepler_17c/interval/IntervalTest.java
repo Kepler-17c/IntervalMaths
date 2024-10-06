@@ -288,6 +288,29 @@ class IntervalTest {
     }
 
     @Test
+    public void logTest() {
+        // tmp vars
+        Interval log;
+        Rational lower, upper;
+        Rational accuracyTolerance = Rational.TWO.pow(10);
+        // tests
+        log = Interval.ONE.log();
+        checkInterval(Rational.ZERO, log);
+        log = Interval.of(-1).log();
+        Assertions.assertEquals(Interval.NaN, log);
+        log = Interval.ZERO.log();
+        Assertions.assertEquals(Interval.NEGATIVE_INFINITY, log);
+        log = Interval.POSITIVE_INFINITY.log();
+        Assertions.assertEquals(Interval.POSITIVE_INFINITY, log);
+        log = Interval.TWO.log();
+        lower = Rational.of("0.6931471805599453094172321214581");
+        upper = Rational.of("0.6931471805599453094172321214582");
+        checkInterval(lower, upper, log, accuracyTolerance);
+        log = Interval.ONE.exp().log();
+        checkInterval(Rational.ONE, log, Rational.of(3));
+    }
+
+    @Test
     public void mergeWithTest() {
         Interval expected, actual;
         expected = Interval.of(1, 10);
