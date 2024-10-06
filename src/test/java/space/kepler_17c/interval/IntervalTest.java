@@ -1,9 +1,10 @@
 package space.kepler_17c.interval;
 
-import java.math.BigInteger;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigInteger;
+import java.util.List;
 
 class IntervalTest {
     @Test
@@ -285,6 +286,8 @@ class IntervalTest {
         checkInterval(Rational.ZERO, exp);
         exp = Interval.POSITIVE_INFINITY.exp();
         Assertions.assertEquals(Interval.POSITIVE_INFINITY, exp);
+        exp = Interval.NaN.exp();
+        Assertions.assertEquals(Interval.NaN, exp);
     }
 
     @Test
@@ -310,8 +313,16 @@ class IntervalTest {
         checkInterval(Rational.ONE, log, Rational.of(3));
         log = Interval.of(1000000).log10();
         checkInterval(Rational.of(6), log, accuracyTolerance);
+        log = Interval.of(Rational.of(2, 3)).log10();
+        lower = Rational.of("-0.1760912590556812420812890085306");
+        upper = Rational.of("-0.1760912590556812420812890085307");
+        checkInterval(lower, upper, log, accuracyTolerance);
         log = Interval.of(Rational.of(BigInteger.ONE.shiftLeft(8))).log2();
         checkInterval(Rational.of(8), log, accuracyTolerance);
+        log = Interval.TWO.inverse().log2();
+        checkInterval(Rational.ONE.negate(), log, accuracyTolerance);
+        log = Interval.NaN.log();
+        Assertions.assertEquals(Interval.NaN, log);
     }
 
     @Test
@@ -390,6 +401,7 @@ class IntervalTest {
 
     @Test
     public void comparisonsTest() {
+        // compareTo
         List<Interval> orderedTestValues = List.of(
                 Interval.of(Rational.NEGATIVE_INFINITY),
                 Interval.of(Rational.TEN.negate()),
@@ -413,6 +425,11 @@ class IntervalTest {
                 Assertions.assertEquals(1, iv.compareTo(interval), "Comparing " + iv + " to " + interval);
             });
         }
+        // equals
+        Assertions.assertNotEquals(Interval.of(0), null);
+        // hashCode
+        Assertions.assertEquals(Interval.of(1).hashCode(), Interval.ONE.hashCode());
+        Assertions.assertNotEquals(Interval.ONE.hashCode(), Interval.TWO.hashCode());
     }
 
     @Test
@@ -470,7 +487,10 @@ class IntervalTest {
     }
 
     private static void checkInterval(Rational expectedValue, Interval actualInterval, Rational accuracyRatioLimit) {
-        Assertions.assertTrue(actualInterval.contains(expectedValue));
+        Assertions.assertTrue(
+                actualInterval.contains(expectedValue),
+                "Interval [" + actualInterval.min.toDecimalString(8) + ", " + actualInterval.max.toDecimalString(8)
+                        + "] doesn't contain expected value " + expectedValue.toDecimalString(8));
         Rational accuracyRatio = actualInterval.uncertainty().divide(Interval.getAccuracy());
         Assertions.assertTrue(
                 accuracyRatio.isLessOrEqualTo(accuracyRatioLimit),

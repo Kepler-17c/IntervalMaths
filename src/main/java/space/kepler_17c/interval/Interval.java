@@ -222,7 +222,7 @@ public class Interval implements Comparable<Interval> {
     }
 
     public Interval pow(Interval other) {
-        if (this.min.isNaN() || this.max.isNaN() || other.min.isNaN() || other.max.isNaN()) {
+        if (this.equals(NaN) || other.equals(NaN)) {
             return NaN;
         }
         if (this.min.signum() > 0) {
