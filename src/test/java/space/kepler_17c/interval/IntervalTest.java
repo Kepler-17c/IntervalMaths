@@ -357,6 +357,13 @@ class IntervalTest {
     }
 
     @Test
+    public void eTest() {
+        Rational lower = Rational.of("2.718281828459045235360287471352");
+        Rational upper = Rational.of("2.718281828459045235360287471353");
+        checkInterval(lower, upper, Interval.e());
+    }
+
+    @Test
     public void mergeWithTest() {
         Interval expected, actual;
         expected = Interval.of(1, 10);

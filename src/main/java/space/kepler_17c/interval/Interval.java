@@ -20,10 +20,11 @@ public class Interval implements Comparable<Interval> {
     }
 
     // constant caches
-    private static final Map<Integer, Interval> SQRT_2 = new HashMap<>();
-    private static final Map<Integer, Interval> LN_SQRT_2 = new HashMap<>();
-    private static final Map<Integer, Interval> LN_2 = new HashMap<>();
-    private static final Map<Integer, Interval> LN_10 = new HashMap<>();
+    private static final Map<Integer, Interval> SQRT_2_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> LN_SQRT_2_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> LN_2_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> LN_10_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> E_CACHE = new HashMap<>();
 
     // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
@@ -146,7 +147,7 @@ public class Interval implements Comparable<Interval> {
          * Reduce loop complexity by re-using the interim result as remainder term.
          * Applying the transform above guarantees its absolute value will always be greater.
          */
-        Interval optimalRange = new Interval(sqrt2().inverse().min, sqrt2().max);
+        Interval optimalRange = new Interval(sqrt2Lookup().inverse().min, sqrt2Lookup().max);
         boolean noTransform = optimalRange.contains(value);
         int magnitude = value.magnitude();
         Rational effectiveValue;
@@ -182,43 +183,43 @@ public class Interval implements Comparable<Interval> {
         Interval resultInterval = Interval.of(result, result.add(interimResult));
         return noTransform
                 ? resultInterval
-                : Interval.of(2L * magnitude).multiply(lnSqrt2()).add(resultInterval);
+                : Interval.of(2L * magnitude).multiply(lnSqrt2Lookup()).add(resultInterval);
     }
 
-    private static Interval sqrt2() {
-        if (!SQRT_2.containsKey(accuracyBitCount)) {
-            SQRT_2.put(accuracyBitCount, sqrt(Rational.TWO));
+    private static Interval sqrt2Lookup() {
+        if (!SQRT_2_CACHE.containsKey(accuracyBitCount)) {
+            SQRT_2_CACHE.put(accuracyBitCount, sqrt(Rational.TWO));
         }
-        return SQRT_2.get(accuracyBitCount);
+        return SQRT_2_CACHE.get(accuracyBitCount);
     }
 
-    private static Interval lnSqrt2() {
-        if (!LN_SQRT_2.containsKey(accuracyBitCount)) {
-            LN_SQRT_2.put(accuracyBitCount, sqrt2().log());
+    private static Interval lnSqrt2Lookup() {
+        if (!LN_SQRT_2_CACHE.containsKey(accuracyBitCount)) {
+            LN_SQRT_2_CACHE.put(accuracyBitCount, sqrt2Lookup().log());
         }
-        return LN_SQRT_2.get(accuracyBitCount);
+        return LN_SQRT_2_CACHE.get(accuracyBitCount);
     }
 
-    private static Interval ln2() {
-        if (!LN_2.containsKey(accuracyBitCount)) {
-            LN_2.put(accuracyBitCount, log(Rational.TWO));
+    private static Interval ln2Lookup() {
+        if (!LN_2_CACHE.containsKey(accuracyBitCount)) {
+            LN_2_CACHE.put(accuracyBitCount, log(Rational.TWO));
         }
-        return LN_2.get(accuracyBitCount);
+        return LN_2_CACHE.get(accuracyBitCount);
     }
 
-    private static Interval ln10() {
-        if (!LN_10.containsKey(accuracyBitCount)) {
-            LN_10.put(accuracyBitCount, log(Rational.TEN));
+    private static Interval ln10Lookup() {
+        if (!LN_10_CACHE.containsKey(accuracyBitCount)) {
+            LN_10_CACHE.put(accuracyBitCount, log(Rational.TEN));
         }
-        return LN_10.get(accuracyBitCount);
+        return LN_10_CACHE.get(accuracyBitCount);
     }
 
     public Interval log2() {
-        return log().divide(ln2());
+        return log().divide(ln2Lookup());
     }
 
     public Interval log10() {
-        return log().divide(ln10());
+        return log().divide(ln10Lookup());
     }
 
     public Interval pow(Interval other) {
@@ -233,6 +234,26 @@ public class Interval implements Comparable<Interval> {
             return NaN;
         }
         return other.contains(Rational.ZERO) ? NaN : ZERO;
+    }
+
+    private static Interval calcE() {
+        BigInteger factorial = BigInteger.ONE;
+        int factorialCounter = 1;
+        Rational result = Rational.ZERO;
+        Rational interimResult;
+        do {
+            interimResult = Rational.ONE.divide(Rational.of(factorial)).cutAccuracy(accuracyBitCount * 2, false);
+            result = result.add(interimResult).cutAccuracy(accuracyBitCount * 2, false);
+            factorial = factorial.multiply(BigInteger.valueOf(factorialCounter++));
+        } while (interimResult.compareTo(accuracy) > 0);
+        return Interval.of(result, result.add(interimResult));
+    }
+
+    public static Interval e() {
+        if (!E_CACHE.containsKey(accuracyBitCount)) {
+            E_CACHE.put(accuracyBitCount, calcE());
+        }
+        return E_CACHE.get(accuracyBitCount);
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
