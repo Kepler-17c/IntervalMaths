@@ -90,6 +90,31 @@ public class Interval implements Comparable<Interval> {
         return Interval.of(result, result.subtract(diff));
     }
 
+    public Interval exp() {
+        return this.equals(NaN) ? NaN : exp(min).mergeWith(exp(max));
+    }
+
+    private static Interval exp(Rational value) {
+        if (value.isInfinite()) {
+            return value.signum() < 0 ? ZERO : POSITIVE_INFINITY;
+        }
+        // derived from Taylor series
+        Rational pow = Rational.ONE;
+        Rational factorial = Rational.ONE;
+        int factorialCounter = 1;
+        Rational result = Rational.ZERO;
+        Rational interimResult;
+        do {
+            interimResult = pow.divide(factorial);
+            result = result.add(interimResult);
+            pow = pow.multiply(value);
+            factorial = factorial.multiply(Rational.of(factorialCounter++));
+        } while (interimResult.abs().compareTo(accuracy) > 0);
+        return value.signum() < 0
+                ? Interval.of(result, result.subtract(interimResult))
+                : Interval.of(result, result.add(interimResult));
+    }
+
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
         List<Rational> interimResults = new ArrayList<>();
         interimResults.add(operator.apply(this.min, other.min));

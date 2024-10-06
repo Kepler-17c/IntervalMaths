@@ -270,6 +270,24 @@ class IntervalTest {
     }
 
     @Test
+    public void expTest() {
+        // tmp vars
+        Interval exp;
+        Rational lower, upper;
+        // tests
+        exp = Interval.ONE.exp();
+        lower = Rational.of("2.718281828459045235360287471352");
+        upper = Rational.of("2.718281828459045235360287471353");
+        checkInterval(lower, upper, exp);
+        exp = Interval.ZERO.exp();
+        checkInterval(Rational.ONE, exp);
+        exp = Interval.NEGATIVE_INFINITY.exp();
+        checkInterval(Rational.ZERO, exp);
+        exp = Interval.POSITIVE_INFINITY.exp();
+        Assertions.assertEquals(Interval.POSITIVE_INFINITY, exp);
+    }
+
+    @Test
     public void mergeWithTest() {
         Interval expected, actual;
         expected = Interval.of(1, 10);
