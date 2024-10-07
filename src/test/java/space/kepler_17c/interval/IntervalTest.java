@@ -328,7 +328,6 @@ class IntervalTest {
     @Test
     public void powTest() {
         Interval pow;
-        Rational lower, upper;
         Rational accuracyTolerance = Rational.TWO.pow(16);
         // tests
         pow = Interval.TWO.pow(Interval.TEN);
@@ -358,9 +357,18 @@ class IntervalTest {
 
     @Test
     public void eTest() {
+        Interval.e();
         Rational lower = Rational.of("2.718281828459045235360287471352");
         Rational upper = Rational.of("2.718281828459045235360287471353");
         checkInterval(lower, upper, Interval.e());
+    }
+
+    @Test
+    public void piTest() {
+        Interval.pi();
+        Rational lower = Rational.of("3.141592653589793238462643383279");
+        Rational upper = Rational.of("3.141592653589793238462643383280");
+        checkInterval(lower, upper, Interval.pi(), Rational.TWO.pow(6));
     }
 
     @Test
@@ -513,6 +521,9 @@ class IntervalTest {
             Rational expectedLower, Rational expectedUpper, Interval actualInterval, Rational accuracyRatioLimit) {
         Assertions.assertTrue(Interval.of(expectedLower, expectedUpper).contains(actualInterval));
         Rational accuracyRatio = actualInterval.uncertainty().divide(Interval.getAccuracy());
-        Assertions.assertTrue(accuracyRatio.isLessOrEqualTo(accuracyRatioLimit));
+        Assertions.assertTrue(
+                accuracyRatio.isLessOrEqualTo(accuracyRatioLimit),
+                "Accuracy ratio failed: expected less than " + accuracyRatioLimit.toDecimalString(8) + " but was "
+                        + accuracyRatio.toDecimalString(8));
     }
 }

@@ -25,6 +25,7 @@ public class Interval implements Comparable<Interval> {
     private static final Map<Integer, Interval> LN_2_CACHE = new HashMap<>();
     private static final Map<Integer, Interval> LN_10_CACHE = new HashMap<>();
     private static final Map<Integer, Interval> E_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> PI_CACHE = new HashMap<>();
 
     // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
@@ -254,6 +255,49 @@ public class Interval implements Comparable<Interval> {
             E_CACHE.put(accuracyBitCount, calcE());
         }
         return E_CACHE.get(accuracyBitCount);
+    }
+
+    private static Interval calcPi() {
+        // constants
+        final BigInteger a = BigInteger.valueOf(1103);
+        final BigInteger b = BigInteger.valueOf(26390);
+        final BigInteger c = BigInteger.valueOf(396).pow(4);
+        final Interval d = Interval.of(9801);
+        final BigInteger four = BigInteger.valueOf(4);
+        final BigInteger three = BigInteger.valueOf(3);
+        // tmp vars
+        Rational resultInv = Rational.of(a);
+        Rational interimResult;
+        BigInteger fact4 = BigInteger.ONE;
+        BigInteger lin = BigInteger.ZERO;
+        BigInteger factPow = BigInteger.ONE;
+        BigInteger pow = BigInteger.ONE;
+        BigInteger index = BigInteger.ONE;
+        BigInteger idxFour = four;
+        do {
+            fact4 = fact4.multiply(idxFour.subtract(three))
+                    .multiply(idxFour.subtract(BigInteger.TWO))
+                    .multiply(idxFour.subtract(BigInteger.ONE))
+                    .multiply(idxFour);
+            lin = lin.add(b);
+            BigInteger numerator = a.add(lin).multiply(fact4);
+            factPow = factPow.multiply(index).multiply(index).multiply(index).multiply(index);
+            pow = pow.multiply(c);
+            BigInteger denominator = factPow.multiply(pow);
+            interimResult = Rational.of(numerator, denominator);
+            resultInv = resultInv.add(interimResult);
+            index = index.add(BigInteger.ONE);
+            idxFour = idxFour.add(four);
+        } while (interimResult.isGreaterThan(accuracy));
+        Interval resInvIv = Interval.of(resultInv, resultInv.add(interimResult));
+        return d.divide(sqrt2Lookup().multiply(TWO)).divide(resInvIv);
+    }
+
+    public static Interval pi() {
+        if (!PI_CACHE.containsKey(accuracyBitCount)) {
+            PI_CACHE.put(accuracyBitCount, calcPi());
+        }
+        return PI_CACHE.get(accuracyBitCount);
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
