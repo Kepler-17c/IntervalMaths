@@ -213,6 +213,30 @@ class RationalTest {
     }
 
     @Test
+    public void floorTest() {
+        Assertions.assertEquals(Rational.ZERO, Rational.ZERO.floor());
+        Assertions.assertEquals(Rational.ONE, Rational.ONE.floor());
+        Assertions.assertEquals(Rational.ONE.negate(), Rational.ONE.negate().floor());
+        Assertions.assertEquals(Rational.of(1), Rational.of("1.5").floor());
+        Assertions.assertEquals(Rational.of(-2), Rational.of("-1.5").floor());
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.floor());
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.POSITIVE_INFINITY.floor());
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.NEGATIVE_INFINITY.floor());
+    }
+
+    @Test
+    public void ceilTest() {
+        Assertions.assertEquals(Rational.ZERO, Rational.ZERO.ceil());
+        Assertions.assertEquals(Rational.ONE, Rational.ONE.ceil());
+        Assertions.assertEquals(Rational.ONE.negate(), Rational.ONE.negate().ceil());
+        Assertions.assertEquals(Rational.of(2), Rational.of("1.5").ceil());
+        Assertions.assertEquals(Rational.of(-1), Rational.of("-1.5").ceil());
+        Assertions.assertEquals(Rational.NaN, Rational.NaN.ceil());
+        Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.POSITIVE_INFINITY.ceil());
+        Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.NEGATIVE_INFINITY.ceil());
+    }
+
+    @Test
     public void cutAccuracyTest() {
         Random rnd = new Random("cutAccuracyTest-rnd-seed".hashCode());
         int testCount = 128;

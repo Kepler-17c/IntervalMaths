@@ -125,6 +125,26 @@ public class Rational implements Comparable<Rational> {
         return signum() < 0 ? negate() : this;
     }
 
+    public Rational floor() {
+        if (!isFinite()) {
+            return this;
+        }
+        BigInteger rounded = numerator.divide(denominator);
+        return rounded.multiply(denominator).compareTo(numerator) <= 0
+                ? Rational.of(rounded)
+                : Rational.of(rounded.subtract(BigInteger.ONE));
+    }
+
+    public Rational ceil() {
+        if (!isFinite()) {
+            return this;
+        }
+        BigInteger rounded = numerator.divide(denominator);
+        return rounded.multiply(denominator).compareTo(numerator) >= 0
+                ? Rational.of(rounded)
+                : Rational.of(rounded.add(BigInteger.ONE));
+    }
+
     public Rational cutAccuracy(int bitCount, boolean roundingUp) {
         int maxBitLength = Math.max(numerator.bitLength(), denominator.bitLength());
         if (maxBitLength <= bitCount) {
