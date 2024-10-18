@@ -214,6 +214,7 @@ class RationalTest {
 
     @Test
     public void floorTest() {
+        // normal floor
         Assertions.assertEquals(Rational.ZERO, Rational.ZERO.floor());
         Assertions.assertEquals(Rational.ONE, Rational.ONE.floor());
         Assertions.assertEquals(Rational.ONE.negate(), Rational.ONE.negate().floor());
@@ -222,10 +223,14 @@ class RationalTest {
         Assertions.assertEquals(Rational.NaN, Rational.NaN.floor());
         Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.POSITIVE_INFINITY.floor());
         Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.NEGATIVE_INFINITY.floor());
+        // special floor
+        Assertions.assertEquals(Rational.ZERO, Rational.ONE.floorToMultipleOf(Rational.TWO));
+        Assertions.assertEquals(Rational.TWO.negate(), Rational.ONE.negate().floorToMultipleOf(Rational.TWO));
     }
 
     @Test
     public void ceilTest() {
+        // normal ceil
         Assertions.assertEquals(Rational.ZERO, Rational.ZERO.ceil());
         Assertions.assertEquals(Rational.ONE, Rational.ONE.ceil());
         Assertions.assertEquals(Rational.ONE.negate(), Rational.ONE.negate().ceil());
@@ -234,6 +239,9 @@ class RationalTest {
         Assertions.assertEquals(Rational.NaN, Rational.NaN.ceil());
         Assertions.assertEquals(Rational.POSITIVE_INFINITY, Rational.POSITIVE_INFINITY.ceil());
         Assertions.assertEquals(Rational.NEGATIVE_INFINITY, Rational.NEGATIVE_INFINITY.ceil());
+        // special ceil
+        Assertions.assertEquals(Rational.TWO, Rational.ONE.ceilToMultipleOf(Rational.TWO));
+        Assertions.assertEquals(Rational.ZERO, Rational.ONE.negate().ceilToMultipleOf(Rational.TWO));
     }
 
     @Test

@@ -135,6 +135,10 @@ public class Rational implements Comparable<Rational> {
                 : Rational.of(rounded.subtract(BigInteger.ONE));
     }
 
+    public Rational floorToMultipleOf(Rational value) {
+        return this.divide(value).floor().multiply(value);
+    }
+
     public Rational ceil() {
         if (!isFinite()) {
             return this;
@@ -143,6 +147,10 @@ public class Rational implements Comparable<Rational> {
         return rounded.multiply(denominator).compareTo(numerator) >= 0
                 ? Rational.of(rounded)
                 : Rational.of(rounded.add(BigInteger.ONE));
+    }
+
+    public Rational ceilToMultipleOf(Rational value) {
+        return this.divide(value).ceil().multiply(value);
     }
 
     public Rational cutAccuracy(int bitCount, boolean roundingUp) {
