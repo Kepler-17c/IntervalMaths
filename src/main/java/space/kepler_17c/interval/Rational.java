@@ -153,6 +153,19 @@ public class Rational implements Comparable<Rational> {
         return this.divide(value).ceil().multiply(value);
     }
 
+    public Rational clamp(Rational lower, Rational upper) {
+        if (upper.isLessThan(lower)) {
+            return NaN;
+        }
+        if (isLessThan(lower)) {
+            return lower;
+        }
+        if (isGreaterThan(upper)) {
+            return upper;
+        }
+        return this;
+    }
+
     public Rational cutAccuracy(int bitCount, boolean roundingUp) {
         int maxBitLength = Math.max(numerator.bitLength(), denominator.bitLength());
         if (maxBitLength <= bitCount) {

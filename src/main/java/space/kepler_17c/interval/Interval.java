@@ -321,6 +321,14 @@ public class Interval implements Comparable<Interval> {
                 : Interval.of(Rational.min(this.min, other.min), Rational.max(this.max, other.max));
     }
 
+    public Interval clamp(Rational lower, Rational upper) {
+        return Interval.of(min.clamp(lower, upper), max.clamp(lower, upper));
+    }
+
+    public Interval clamp(Interval other) {
+        return clamp(other.min, other.max);
+    }
+
     public boolean contains(Rational value) {
         return !this.equals(NaN) && min.isLessOrEqualTo(value) && max.isGreaterOrEqualTo(value);
     }

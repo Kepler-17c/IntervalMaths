@@ -245,6 +245,14 @@ class RationalTest {
     }
 
     @Test
+    public void clampTest() {
+        Assertions.assertEquals(Rational.NaN, Rational.ZERO.clamp(Rational.TWO, Rational.ONE));
+        Assertions.assertEquals(Rational.ZERO, Rational.ONE.negate().clamp(Rational.ZERO, Rational.ONE));
+        Assertions.assertEquals(Rational.ONE, Rational.ONE.clamp(Rational.ZERO, Rational.TWO));
+        Assertions.assertEquals(Rational.ONE, Rational.TWO.clamp(Rational.ZERO, Rational.ONE));
+    }
+
+    @Test
     public void cutAccuracyTest() {
         Random rnd = new Random("cutAccuracyTest-rnd-seed".hashCode());
         int testCount = 128;

@@ -392,6 +392,16 @@ class IntervalTest {
     }
 
     @Test
+    public void clampTest() {
+        Assertions.assertEquals(Interval.ONE, Interval.ZERO.clamp(Rational.ONE, Rational.ONE));
+        Assertions.assertEquals(Interval.ONE, Interval.ONE.clamp(Rational.ONE, Rational.ONE));
+        Assertions.assertEquals(Interval.ONE, Interval.TWO.clamp(Rational.ONE, Rational.ONE));
+        Assertions.assertEquals(Interval.ONE, Interval.ZERO.clamp(Interval.ONE));
+        Assertions.assertEquals(Interval.ONE, Interval.ONE.clamp(Interval.ONE));
+        Assertions.assertEquals(Interval.ONE, Interval.TWO.clamp(Interval.ONE));
+    }
+
+    @Test
     public void containsTest() {
         // contains Rational
         Assertions.assertTrue(Interval.of(0, 2).contains(Rational.ZERO));
