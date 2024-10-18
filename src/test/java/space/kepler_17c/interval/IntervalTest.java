@@ -415,6 +415,20 @@ class IntervalTest {
     }
 
     @Test
+    public void intersectsTest() {
+        Interval a, b;
+        a = Interval.of(1, 3);
+        Assertions.assertTrue(a.intersects(a));
+        b = Interval.of(0, 2);
+        Assertions.assertTrue(a.intersects(b));
+        Assertions.assertTrue(b.intersects(a));
+        a = Interval.of(0, 3);
+        b = Interval.of(1, 2);
+        Assertions.assertTrue(a.intersects(b));
+        Assertions.assertTrue(b.intersects(a));
+    }
+
+    @Test
     public void comparisonsTest() {
         // compareTo
         List<Interval> orderedTestValues = List.of(

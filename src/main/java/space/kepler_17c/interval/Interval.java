@@ -332,6 +332,10 @@ public class Interval implements Comparable<Interval> {
         return min.isLessOrEqualTo(other.min) && max.isGreaterOrEqualTo(other.max);
     }
 
+    public boolean intersects(Interval other) {
+        return contains(other.min) || contains(other.max) || other.contains(min) || other.contains(max);
+    }
+
     @Override
     public int compareTo(Interval other) {
         int lowerCmp = this.min.compareTo(other.min);
