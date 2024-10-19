@@ -26,6 +26,7 @@ public class Interval implements Comparable<Interval> {
     private static final Map<Integer, Interval> LN_10_CACHE = new HashMap<>();
     private static final Map<Integer, Interval> E_CACHE = new HashMap<>();
     private static final Map<Integer, Interval> PI_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> PI_HALF_CACHE = new HashMap<>();
 
     // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
@@ -298,6 +299,21 @@ public class Interval implements Comparable<Interval> {
             PI_CACHE.put(accuracyBitCount, calcPi());
         }
         return PI_CACHE.get(accuracyBitCount);
+    }
+
+    public static Interval piHalf() {
+        if (!PI_HALF_CACHE.containsKey(accuracyBitCount)) {
+            PI_HALF_CACHE.put(accuracyBitCount, pi().divide(TWO));
+        }
+        return PI_HALF_CACHE.get(accuracyBitCount);
+    }
+
+    public Interval degInRad() {
+        return this.divide(Interval.of(180)).multiply(pi());
+    }
+
+    public Interval radInDeg() {
+        return this.divide(pi()).multiply(Interval.of(180));
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {

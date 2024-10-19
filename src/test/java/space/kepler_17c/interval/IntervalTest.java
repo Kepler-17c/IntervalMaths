@@ -372,6 +372,26 @@ class IntervalTest {
     }
 
     @Test
+    public void degRadConversionTest() {
+        List<List<Interval>> testDegRadPairs = List.of(
+                List.of(Interval.of(0), Interval.ZERO),
+                List.of(Interval.of(90), Interval.piHalf()),
+                List.of(Interval.of(-90), Interval.piHalf().negate()),
+                List.of(Interval.of(180), Interval.pi()),
+                List.of(Interval.of(-180), Interval.pi().negate()),
+                List.of(Interval.of(270), Interval.pi().add(Interval.piHalf())),
+                List.of(Interval.of(-270), Interval.pi().add(Interval.piHalf()).negate()),
+                List.of(Interval.of(360), Interval.pi().multiply(Interval.TWO)),
+                List.of(Interval.of(-360), Interval.pi().multiply(Interval.TWO).negate()));
+        for (List<Interval> pair : testDegRadPairs) {
+            Interval deg = pair.get(0);
+            Interval rad = pair.get(1);
+            Assertions.assertTrue(deg.degInRad().intersects(rad));
+            Assertions.assertTrue(rad.radInDeg().intersects(deg));
+        }
+    }
+
+    @Test
     public void mergeWithTest() {
         Interval expected, actual;
         expected = Interval.of(1, 10);
