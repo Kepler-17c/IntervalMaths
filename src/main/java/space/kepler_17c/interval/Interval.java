@@ -27,6 +27,7 @@ public class Interval implements Comparable<Interval> {
     private static final Map<Integer, Interval> E_CACHE = new HashMap<>();
     private static final Map<Integer, Interval> PI_CACHE = new HashMap<>();
     private static final Map<Integer, Interval> PI_HALF_CACHE = new HashMap<>();
+    private static final Map<Integer, Interval> PI_QUARTER_CACHE = new HashMap<>();
 
     // public constants
     public static final Interval ZERO = new Interval(Rational.ZERO);
@@ -36,6 +37,9 @@ public class Interval implements Comparable<Interval> {
     public static final Interval POSITIVE_INFINITY = new Interval(Rational.POSITIVE_INFINITY);
     public static final Interval NEGATIVE_INFINITY = new Interval(Rational.NEGATIVE_INFINITY);
     public static final Interval NaN = new Interval(Rational.NaN);
+
+    // private constants
+    private static final Interval UNIT_RANGE = new Interval(Rational.ONE.negate(), Rational.ONE);
 
     public final Rational min;
     public final Rational max;
@@ -308,12 +312,126 @@ public class Interval implements Comparable<Interval> {
         return PI_HALF_CACHE.get(accuracyBitCount);
     }
 
+    public static Interval piQuarter() {
+        if (!PI_QUARTER_CACHE.containsKey(accuracyBitCount)) {
+            PI_QUARTER_CACHE.put(accuracyBitCount, piHalf().divide(TWO));
+        }
+        return PI_QUARTER_CACHE.get(accuracyBitCount);
+    }
+
     public Interval degInRad() {
         return this.divide(Interval.of(180)).multiply(pi());
     }
 
     public Interval radInDeg() {
         return this.divide(pi()).multiply(Interval.of(180));
+    }
+
+    public Interval sin() {
+        if (equals(NaN) || min.equals(max) && min.isInfinite()) {
+            return NaN;
+        }
+        if (min.isInfinite() || max.isInfinite()) {
+            return UNIT_RANGE;
+        }
+        // normalise: move lower bound into [0, 2pi]
+        Rational piShift = (min.isLessThan(Rational.ZERO) ? min.divide(pi().min) : min.divide(pi().max))
+                .floorToMultipleOf(Rational.TWO);
+        Interval normalisedInterval =
+                Interval.of(piShift.negate()).multiply(pi()).add(this);
+        // check extrema for trivial result and  possible optimisation
+        // lower bound in [0, 2pi] -> check two periods
+        List<Rational> extrema = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            Interval localExtremum = Interval.of(i).multiply(pi()).add(piHalf());
+            if (normalisedInterval.intersects(localExtremum)) {
+                extrema.add(i % 2 == 0 ? Rational.ONE : Rational.ONE.negate());
+            }
+        }
+        if (extrema.size() >= 2) {
+            return UNIT_RANGE;
+        }
+        // calc on bounds & merge
+        Interval result = sin(normalisedInterval.min).mergeWith(sin(normalisedInterval.max));
+        for (Rational x : extrema) {
+            result = result.mergeWith(x);
+        }
+        return result.clamp(UNIT_RANGE);
+    }
+
+    public Interval cos() {
+        return piHalf().add(this).sin();
+    }
+
+    private static Interval sin(Rational value) {
+        // move value into [0, 2pi]
+        Rational piShift = value.divide(pi().max).floorToMultipleOf(Rational.TWO);
+        Interval normalised = Interval.of(piShift.negate()).multiply(pi()).add(Interval.of(value));
+        // transform to [0, pi/4]
+        boolean negateResult = false;
+        if (normalised.min.isGreaterThan(pi().max)) { // [0, 2pi] -> [0, pi]
+            normalised = normalised.subtract(pi());
+            negateResult = true;
+        }
+        if (normalised.min.isGreaterThan(piHalf().max)) { // [0, pi] -> [0, pi/2]
+            normalised = normalised.subtract(piHalf()).negate().add(piHalf());
+        }
+        if (normalised.min.isGreaterThan(piQuarter().max)) { // [0, pi/2] -> [0, pi/4]
+            normalised = normalised.subtract(piHalf());
+            Interval result = cos(normalised.min).mergeWith(cos(normalised.max));
+            return negateResult ? result.negate() : result;
+        }
+        List<Rational> resultParts = new ArrayList<>();
+        for (Rational r : List.of(normalised.min, normalised.max)) {
+            final Rational valSq = r.multiply(r);
+            Rational pow = r;
+            BigInteger fact = BigInteger.ONE;
+            int index = 0;
+            Rational interimResult;
+            Rational localResult = Rational.ZERO;
+            do {
+                interimResult = pow.divide(Rational.of(fact)).cutAccuracy(accuracyBitCount * 2, false);
+                localResult = (index % 2 == 0 ? localResult.add(interimResult) : localResult.subtract(interimResult))
+                        .cutAccuracy(accuracyBitCount * 2, false);
+                pow = pow.multiply(valSq).cutAccuracy(accuracyBitCount * 2, false);
+                index++;
+                fact = fact.multiply(BigInteger.valueOf(index * 2L));
+                fact = fact.multiply(BigInteger.valueOf(index * 2L + 1));
+            } while (interimResult.isGreaterOrEqualTo(accuracy));
+            resultParts.add(localResult);
+            resultParts.add(index % 2 == 0 ? localResult.add(interimResult) : localResult.subtract(interimResult));
+        }
+        Interval result = Interval.of(resultParts);
+        return negateResult ? result.negate() : result;
+    }
+
+    private static Interval cos(Rational value) {
+        // no need to normalise - value is in [-pi/4, 0] already
+        List<Rational> resultParts = new ArrayList<>();
+        final Rational valSq = value.multiply(value);
+        Rational pow = Rational.ONE;
+        BigInteger fact = BigInteger.ONE;
+        int index = 0;
+        Rational interimResult;
+        Rational localResult = Rational.ZERO;
+        do {
+            interimResult = pow.divide(Rational.of(fact)).cutAccuracy(accuracyBitCount * 2, false);
+            localResult = (index % 2 == 0 ? localResult.add(interimResult) : localResult.subtract(interimResult))
+                    .cutAccuracy(accuracyBitCount * 2, false);
+            pow = pow.multiply(valSq).cutAccuracy(accuracyBitCount * 2, false);
+            index++;
+            fact = fact.multiply(BigInteger.valueOf(index * 2L - 1));
+            fact = fact.multiply(BigInteger.valueOf(index * 2L));
+        } while (interimResult.isGreaterOrEqualTo(accuracy));
+        resultParts.add(localResult);
+        resultParts.add(index % 2 == 0 ? localResult.add(interimResult) : localResult.subtract(interimResult));
+        return Interval.of(resultParts);
+    }
+
+    public Interval tan() {
+        Interval sin = sin();
+        Interval cos = cos();
+        return cos.contains(Rational.ZERO) ? NaN : sin.divide(cos);
     }
 
     private Interval calculate(Interval other, BiFunction<Rational, Rational, Rational> operator) {
@@ -335,6 +453,10 @@ public class Interval implements Comparable<Interval> {
         return this.equals(NaN) || other.equals(NaN)
                 ? NaN
                 : Interval.of(Rational.min(this.min, other.min), Rational.max(this.max, other.max));
+    }
+
+    public Interval mergeWith(Rational value) {
+        return mergeWith(Interval.of(value));
     }
 
     public Interval clamp(Rational lower, Rational upper) {
@@ -398,6 +520,23 @@ public class Interval implements Comparable<Interval> {
 
     public static Rational getAccuracy() {
         return accuracy;
+    }
+
+    public static Interval of(Iterable<Rational> values) {
+        Rational min = Rational.POSITIVE_INFINITY;
+        Rational max = Rational.NEGATIVE_INFINITY;
+        for (Rational r : values) {
+            if (r.equals(Rational.NaN)) {
+                return NaN;
+            }
+            if (r.isLessThan(min)) {
+                min = r;
+            }
+            if (r.isGreaterThan(max)) {
+                max = r;
+            }
+        }
+        return min.isGreaterThan(max) ? NaN : new Interval(min, max);
     }
 
     public static Interval of(Rational limitA, Rational limitB) {

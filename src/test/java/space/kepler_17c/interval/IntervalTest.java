@@ -357,7 +357,7 @@ class IntervalTest {
 
     @Test
     public void eTest() {
-        Interval.e();
+        Interval.e(); // initial call to test caching
         Rational lower = Rational.of("2.718281828459045235360287471352");
         Rational upper = Rational.of("2.718281828459045235360287471353");
         checkInterval(lower, upper, Interval.e());
@@ -365,10 +365,33 @@ class IntervalTest {
 
     @Test
     public void piTest() {
-        Interval.pi();
+        Rational piAccuracy = Rational.TWO.pow(6);
+        Interval.pi(); // initial call to test caching
         Rational lower = Rational.of("3.141592653589793238462643383279");
         Rational upper = Rational.of("3.141592653589793238462643383280");
-        checkInterval(lower, upper, Interval.pi(), Rational.TWO.pow(6));
+        checkInterval(lower, upper, Interval.pi(), piAccuracy);
+        String piString = "3." // more digits than calculated at default accuracy (2048 bits = around 600 decimals)
+                + "14159265358979323846264338327950288419716939937510" // 50
+                + "58209749445923078164062862089986280348253421170679" // 100
+                + "82148086513282306647093844609550582231725359408128" // 150
+                + "48111745028410270193852110555964462294895493038196" // 200
+                + "44288109756659334461284756482337867831652712019091" // 250
+                + "45648566923460348610454326648213393607260249141273" // 300
+                + "72458700660631558817488152092096282925409171536436" // 350
+                + "78925903600113305305488204665213841469519415116094" // 400
+                + "33057270365759591953092186117381932611793105118548" // 450
+                + "07446237996274956735188575272489122793818301194912" // 500
+                + "98336733624406566430860213949463952247371907021798" // 550
+                + "60943702770539217176293176752384674818467669405132" // 600
+                + "00056812714526356082778577134275778960917363717872" // 650
+                + "14684409012249534301465495853710507922796892589235" // 700
+                + "42019956112129021960864034418159813629774771309960" // 750
+                + "51870721134999999837297804995105973173281609631859" // 800
+                + "50244594553469083026425223082533446850352619311881" // 850
+                + "71010003137838752886587533208381420617177669147303" // 900
+                + "59825349042875546873115956286388235378759375195778" // 950
+                + "18577805321712268066130019278766111959092164201989"; // 1000
+        checkInterval(Rational.of(piString), Interval.pi(), piAccuracy);
     }
 
     @Test
@@ -388,6 +411,140 @@ class IntervalTest {
             Interval rad = pair.get(1);
             Assertions.assertTrue(deg.degInRad().intersects(rad));
             Assertions.assertTrue(rad.radInDeg().intersects(deg));
+        }
+    }
+
+    @Test
+    public void sinTest() {
+        Interval expected, actual;
+        Interval approxPi = Interval.of(
+                Rational.of("3.141592653589793238462643383279"), Rational.of("3.141592653589793238462643383280"));
+        Interval approxPiHalf = approxPi.divide(Interval.TWO);
+        // special values
+        Assertions.assertEquals(Interval.NaN, Interval.NaN.sin());
+        Assertions.assertEquals(Interval.NaN, Interval.POSITIVE_INFINITY.sin());
+        Assertions.assertEquals(Interval.NaN, Interval.NEGATIVE_INFINITY.sin());
+        expected = Interval.of(-1, 1);
+        actual = Interval.of(Rational.NEGATIVE_INFINITY, Rational.ZERO).sin();
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.of(Rational.ZERO, Rational.POSITIVE_INFINITY).sin();
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.of(Rational.NEGATIVE_INFINITY, Rational.POSITIVE_INFINITY)
+                .sin();
+        Assertions.assertEquals(expected, actual);
+        // wide intervals
+        actual = Interval.of(1, 10).sin();
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.of(-10, -1).sin();
+        Assertions.assertEquals(expected, actual);
+        // extrema
+        Assertions.assertTrue(Interval.ZERO.sin().contains(Rational.ZERO));
+        Assertions.assertTrue(approxPiHalf.sin().contains(Rational.ONE));
+        Assertions.assertTrue(approxPi.sin().contains(Rational.ZERO));
+        Assertions.assertTrue(approxPi.add(approxPiHalf).sin().contains(Rational.ONE.negate()));
+        Assertions.assertTrue(approxPi.multiply(Interval.TWO).sin().contains(Rational.ZERO));
+        // known values
+        Interval three = Interval.of(3);
+        Interval four = Interval.of(4);
+        Interval five = Interval.of(5);
+        Interval six = Interval.of(6);
+        List<List<Interval>> testPairs = List.of(
+                List.of(six.sqrt().subtract(Interval.TWO.sqrt()).divide(four), Interval.of(15)),
+                List.of(five.sqrt().subtract(Interval.ONE).divide(four), Interval.of(18)),
+                List.of(Interval.TWO.inverse(), Interval.of(30)),
+                List.of(Interval.TWO.sqrt().inverse(), Interval.of(45)),
+                List.of(five.sqrt().add(Interval.ONE).divide(four), Interval.of(54)),
+                List.of(three.sqrt().divide(Interval.TWO), Interval.of(60)));
+        for (List<Interval> pair : testPairs) {
+            expected = pair.get(0);
+            Interval deg = pair.get(1);
+            Assertions.assertTrue(expected.intersects(deg.degInRad().sin()));
+        }
+    }
+
+    @Test
+    public void cosTest() {
+        Interval expected, actual;
+        Interval approxPi = Interval.of(
+                Rational.of("3.141592653589793238462643383279"), Rational.of("3.141592653589793238462643383280"));
+        Interval approxPiHalf = approxPi.divide(Interval.TWO);
+        // special values
+        Assertions.assertEquals(Interval.NaN, Interval.NaN.cos());
+        Assertions.assertEquals(Interval.NaN, Interval.POSITIVE_INFINITY.cos());
+        Assertions.assertEquals(Interval.NaN, Interval.NEGATIVE_INFINITY.cos());
+        expected = Interval.of(-1, 1);
+        actual = Interval.of(Rational.NEGATIVE_INFINITY, Rational.ZERO).cos();
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.of(Rational.ZERO, Rational.POSITIVE_INFINITY).cos();
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.of(Rational.NEGATIVE_INFINITY, Rational.POSITIVE_INFINITY)
+                .cos();
+        Assertions.assertEquals(expected, actual);
+        // wide intervals
+        actual = Interval.of(1, 10).cos();
+        Assertions.assertEquals(expected, actual);
+        actual = Interval.of(-10, -1).cos();
+        Assertions.assertEquals(expected, actual);
+        // extrema
+        Assertions.assertTrue(Interval.ZERO.cos().contains(Rational.ONE));
+        Assertions.assertTrue(approxPiHalf.cos().contains(Rational.ZERO));
+        Assertions.assertTrue(approxPi.cos().contains(Rational.ONE.negate()));
+        Assertions.assertTrue(approxPi.add(approxPiHalf).cos().contains(Rational.ZERO));
+        Assertions.assertTrue(approxPi.multiply(Interval.TWO).cos().contains(Rational.ONE));
+        // known values
+        Interval three = Interval.of(3);
+        Interval four = Interval.of(4);
+        Interval five = Interval.of(5);
+        Interval six = Interval.of(6);
+        List<List<Interval>> testPairs = List.of(
+                List.of(six.sqrt().add(Interval.TWO.sqrt()).divide(four), Interval.of(15)),
+                List.of(three.sqrt().divide(Interval.TWO), Interval.of(30)),
+                List.of(five.sqrt().add(Interval.ONE).divide(four), Interval.of(36)),
+                List.of(Interval.TWO.sqrt().inverse(), Interval.of(45)),
+                List.of(Interval.TWO.inverse(), Interval.of(60)),
+                List.of(five.sqrt().subtract(Interval.ONE).divide(four), Interval.of(72)),
+                List.of(six.sqrt().subtract(Interval.TWO.sqrt()).divide(four), Interval.of(75)));
+        for (List<Interval> pair : testPairs) {
+            expected = pair.get(0);
+            Interval deg = pair.get(1);
+            Assertions.assertTrue(expected.intersects(deg.degInRad().cos()));
+        }
+    }
+
+    @Test
+    public void tanTest() {
+        Interval expected, actual;
+        Interval approxPi = Interval.of(
+                Rational.of("3.141592653589793238462643383279"), Rational.of("3.141592653589793238462643383280"));
+        Interval approxPiHalf = approxPi.divide(Interval.TWO);
+        // special values
+        Assertions.assertEquals(Interval.NaN, Interval.NaN.tan());
+        Assertions.assertEquals(Interval.NaN, Interval.POSITIVE_INFINITY.tan());
+        Assertions.assertEquals(Interval.NaN, Interval.NEGATIVE_INFINITY.tan());
+        actual = Interval.of(Rational.NEGATIVE_INFINITY, Rational.ZERO);
+        Assertions.assertEquals(Interval.NaN, actual.tan());
+        actual = Interval.of(Rational.ZERO, Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Interval.NaN, actual.tan());
+        actual = Interval.of(Rational.NEGATIVE_INFINITY, Rational.POSITIVE_INFINITY);
+        Assertions.assertEquals(Interval.NaN, actual.tan());
+        // wide intervals
+        actual = Interval.of(1, 10).tan();
+        Assertions.assertEquals(Interval.NaN, actual);
+        actual = Interval.of(-10, -1).tan();
+        Assertions.assertEquals(Interval.NaN, actual);
+        // known values
+        Interval sqrt3 = Interval.of(3).sqrt();
+        List<List<Interval>> testPairs = List.of(
+                List.of(Interval.ZERO, Interval.of(0)),
+                List.of(sqrt3.negate().add(Interval.TWO), Interval.of(15)),
+                List.of(sqrt3.inverse(), Interval.of(30)),
+                List.of(Interval.ONE, Interval.of(45)),
+                List.of(sqrt3, Interval.of(60)),
+                List.of(sqrt3.add(Interval.TWO), Interval.of(75)));
+        for (List<Interval> pair : testPairs) {
+            expected = pair.get(0);
+            Interval deg = pair.get(1);
+            Assertions.assertTrue(expected.intersects(deg.degInRad().tan()));
         }
     }
 
@@ -506,6 +663,15 @@ class IntervalTest {
     public void factoryFunctionsTest() {
         Interval interval;
         // from Rational
+        interval = Interval.of(List.of(Rational.ZERO, Rational.ONE, Rational.TWO));
+        Assertions.assertEquals(Rational.ZERO, interval.min);
+        Assertions.assertEquals(Rational.TWO, interval.max);
+        interval = Interval.of(List.of(Rational.ZERO, Rational.NaN, Rational.TWO));
+        Assertions.assertEquals(Rational.NaN, interval.min);
+        Assertions.assertEquals(Rational.NaN, interval.max);
+        interval = Interval.of(List.of());
+        Assertions.assertEquals(Rational.NaN, interval.min);
+        Assertions.assertEquals(Rational.NaN, interval.max);
         interval = Interval.of(Rational.ONE);
         Assertions.assertEquals(Rational.ONE, interval.min);
         Assertions.assertEquals(Rational.ONE, interval.max);
